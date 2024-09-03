@@ -6,9 +6,9 @@ from simulator.utils.action import ActionXY
 class Linear(Policy):
     def __init__(self):
         super().__init__()
-        self.name = 'Linear'
+        self.name = "Linear"
         self.trainable = False
-        self.kinematics = 'holonomic'
+        self.kinematics = "holonomic"
         self.multiagent_training = True
 
     def configure(self, config):

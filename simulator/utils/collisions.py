@@ -10,7 +10,7 @@ def point_to_segment_dist(x1, y1, x2, y2, x3, y3):
     py = y2 - y1
 
     if px == 0 and py == 0:
-        return np.linalg.norm((x3-x1, y3-y1))
+        return np.linalg.norm((x3 - x1, y3 - y1))
 
     u = ((x3 - x1) * px + (y3 - y1) * py) / (px * px + py * py)
 
@@ -23,7 +23,7 @@ def point_to_segment_dist(x1, y1, x2, y2, x3, y3):
     x = x1 + u * px
     y = y1 + u * py
 
-    return np.linalg.norm((x - x3, y-y3))
+    return np.linalg.norm((x - x3, y - y3))
 
 
 def compute_collision_agent_with_robot(agent, robot, action, dmin, time_step):
@@ -34,7 +34,7 @@ def compute_collision_agent_with_robot(agent, robot, action, dmin, time_step):
     """
     px = agent.px - robot.px
     py = agent.py - robot.py
-    if robot.kinematics == 'holonomic':
+    if robot.kinematics == "holonomic":
         vx = agent.vx - action.vx
         vy = agent.vy - action.vy
     else:
@@ -44,7 +44,9 @@ def compute_collision_agent_with_robot(agent, robot, action, dmin, time_step):
     ey = py + vy * time_step
 
     # closest distance between boundaries of two agents
-    closest_dist = point_to_segment_dist(px, py, ex, ey, 0, 0) - agent.radius - robot.radius
+    closest_dist = (
+        point_to_segment_dist(px, py, ex, ey, 0, 0) - agent.radius - robot.radius
+    )
 
     collision = False
     if closest_dist < 0:

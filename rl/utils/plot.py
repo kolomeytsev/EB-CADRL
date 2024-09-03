@@ -11,29 +11,37 @@ def running_mean(x, n):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('log_files', type=str, nargs='+')
-    parser.add_argument('--plot_sr', default=False, action='store_true')
-    parser.add_argument('--plot_cr', default=False, action='store_true')
-    parser.add_argument('--plot_time', default=False, action='store_true')
+    parser.add_argument("log_files", type=str, nargs="+")
+    parser.add_argument("--plot_sr", default=False, action="store_true")
+    parser.add_argument("--plot_cr", default=False, action="store_true")
+    parser.add_argument("--plot_time", default=False, action="store_true")
 
-    parser.add_argument('--plot_reward', dest='plot_reward', default=True, action='store_true')
-    parser.add_argument('--no-plot_reward', dest='plot_reward', default=True, action='store_false')
+    parser.add_argument(
+        "--plot_reward", dest="plot_reward", default=True, action="store_true"
+    )
+    parser.add_argument(
+        "--no-plot_reward", dest="plot_reward", default=True, action="store_false"
+    )
     parser.set_defaults(plot_reward=True)
 
-    parser.add_argument('--plot_train', dest='plot_train', default=True, action='store_true')
-    parser.add_argument('--no-plot_train', dest='plot_train', default=True, action='store_false')
+    parser.add_argument(
+        "--plot_train", dest="plot_train", default=True, action="store_true"
+    )
+    parser.add_argument(
+        "--no-plot_train", dest="plot_train", default=True, action="store_false"
+    )
     parser.set_defaults(plot_train=True)
 
-    parser.add_argument('--plot_val', default=False, action='store_true')
-    parser.add_argument('--window_size', type=int, default=200)
-    parser.add_argument('--output_file', type=str, default='plot.png')
+    parser.add_argument("--plot_val", default=False, action="store_true")
+    parser.add_argument("--window_size", type=int, default=200)
+    parser.add_argument("--output_file", type=str, default="plot.png")
 
     args = parser.parse_args()
 
     # define the names of the models you want to plot and the longest episodes you want to show
     # models = ['LSTM-RL', 'SARL', 'CADRL']
-    models = ['LSTM-RL', 'CADRL', 'SARL']
-    models = ['SARL']
+    models = ["LSTM-RL", "CADRL", "SARL"]
+    models = ["SARL"]
     max_episodes = 30000
 
     ax1 = ax2 = ax3 = ax4 = None
@@ -50,12 +58,14 @@ def main():
     print("args.plot_train:", args.plot_train)
     print("args.plot_val:", args.plot_val)
     for i, log_file in enumerate(args.log_files):
-        with open(log_file, 'r') as file:
+        with open(log_file, "r") as file:
             log = file.read()
 
-        val_pattern = r"VAL_AGGREGATED has success rate: (?P<sr>[0-1].\d+), " \
-                      r"collision rate: (?P<cr>[0-1].\d+), nav time: (?P<time>\d+.\d+), " \
-                      r"total reward: (?P<reward>[-+]?\d+.\d+)"
+        val_pattern = (
+            r"VAL_AGGREGATED has success rate: (?P<sr>[0-1].\d+), "
+            r"collision rate: (?P<cr>[0-1].\d+), nav time: (?P<time>\d+.\d+), "
+            r"total reward: (?P<reward>[-+]?\d+.\d+)"
+        )
         val_episode = []
         val_sr = []
         val_cr = []
@@ -70,9 +80,11 @@ def main():
             val_time.append(float(r[2]))
             val_reward.append(float(r[3]))
 
-        train_pattern = r"TRAIN in episode (?P<episode>\d+)  1 has success rate: (?P<sr>[0-1].\d+), " \
-                        r"collision rate: (?P<cr>[0-1].\d+), nav time: (?P<time>\d+.\d+), " \
-                        r"total reward: (?P<reward>[-+]?\d+.\d+)"
+        train_pattern = (
+            r"TRAIN in episode (?P<episode>\d+)  1 has success rate: (?P<sr>[0-1].\d+), "
+            r"collision rate: (?P<cr>[0-1].\d+), nav time: (?P<time>\d+.\d+), "
+            r"total reward: (?P<reward>[-+]?\d+.\d+)"
+        )
         train_episode = []
         train_sr = []
         train_cr = []
@@ -108,9 +120,9 @@ def main():
                 ax1_legends.append(models[i])
 
             ax1.legend(ax1_legends)
-            ax1.set_xlabel('Episodes')
-            ax1.set_ylabel('Success Rate')
-            ax1.set_title('Success rate')
+            ax1.set_xlabel("Episodes")
+            ax1.set_ylabel("Success Rate")
+            ax1.set_title("Success rate")
 
         # plot time
         if args.plot_time:
@@ -124,8 +136,8 @@ def main():
                 ax2_legends.append(models[i])
 
             ax2.legend(ax2_legends)
-            ax2.set_xlabel('Episodes')
-            ax2.set_ylabel('Time(s)')
+            ax2.set_xlabel("Episodes")
+            ax2.set_ylabel("Time(s)")
             ax2.set_title("Robot's Time to Reach Goal")
 
         # plot cr
@@ -140,9 +152,9 @@ def main():
                 ax3_legends.append(models[i])
 
             ax3.legend(ax3_legends)
-            ax3.set_xlabel('Episodes')
-            ax3.set_ylabel('Collision Rate')
-            ax3.set_title('Collision Rate')
+            ax3.set_xlabel("Episodes")
+            ax3.set_ylabel("Collision Rate")
+            ax3.set_title("Collision Rate")
 
         # plot reward
         if args.plot_reward:
@@ -156,13 +168,13 @@ def main():
                 ax4_legends.append(models[i])
 
             # ax4.legend(ax4_legends)
-            ax4.set_xlabel('Episodes')
-            ax4.set_ylabel('Reward')
-            ax4.set_title('Cumulative Discounted Reward')
-    
+            ax4.set_xlabel("Episodes")
+            ax4.set_ylabel("Reward")
+            ax4.set_title("Cumulative Discounted Reward")
+
     plt.savefig(args.output_file)
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

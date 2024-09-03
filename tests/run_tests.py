@@ -26,17 +26,17 @@ def run_tests():
         "configs/test_configs/test_env_configs/env_adults_5.config",
     ]
     for path in test_configs:
-        test_name = path.split('/')[-1]
+        test_name = path.split("/")[-1]
         results[test_name] = run_basic_simulation(path)
 
     test_configs_scenes = [
         (
             "configs/test_configs/test_env_configs/env_adults_3_bikes_3_static_10.config",
-            "tests/test_scenes/test_scene_adults_3_bikes_3_static_10.json"
+            "tests/test_scenes/test_scene_adults_3_bikes_3_static_10.json",
         ),
     ]
     for env_config_path, scene_path in test_configs_scenes:
-        test_name = scene_path.split('/')[-1]
+        test_name = scene_path.split("/")[-1]
         results[test_name] = run_scene_simulation(env_config_path, scene_path)
 
     results["test_save_load_map"] = run_test_save_load_map()

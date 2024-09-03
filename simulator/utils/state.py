@@ -17,12 +17,36 @@ class FullState(object):
         self.obj_type = obj_type
 
     def __add__(self, other):
-        return other + (self.px, self.py, self.vx, self.vy, self.radius,
-                        self.gx, self.gy, self.v_pref, self.theta)
+        return other + (
+            self.px,
+            self.py,
+            self.vx,
+            self.vy,
+            self.radius,
+            self.gx,
+            self.gy,
+            self.v_pref,
+            self.theta,
+        )
 
     def __str__(self):
-        return ' '.join([str(x) for x in [self.px, self.py, self.vx, self.vy, self.radius,
-                                          self.gx, self.gy, self.v_pref, self.theta, self.obj_type]])
+        return " ".join(
+            [
+                str(x)
+                for x in [
+                    self.px,
+                    self.py,
+                    self.vx,
+                    self.vy,
+                    self.radius,
+                    self.gx,
+                    self.gy,
+                    self.v_pref,
+                    self.theta,
+                    self.obj_type,
+                ]
+            ]
+        )
 
 
 class ObservableState(object):
@@ -42,7 +66,19 @@ class ObservableState(object):
         return other + (self.px, self.py, self.vx, self.vy, self.radius, self.obj_type)
 
     def __str__(self):
-        return ' '.join([str(x) for x in [self.px, self.py, self.vx, self.vy, self.radius, self.obj_type]])
+        return " ".join(
+            [
+                str(x)
+                for x in [
+                    self.px,
+                    self.py,
+                    self.vx,
+                    self.vy,
+                    self.radius,
+                    self.obj_type,
+                ]
+            ]
+        )
 
 
 class JointState(object):

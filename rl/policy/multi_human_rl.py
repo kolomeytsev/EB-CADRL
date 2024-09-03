@@ -6,7 +6,6 @@ from rl.policy.cadrl import CADRL
 
 
 class MultiHumanRL(CADRL):
-
     def __init__(self):
         super().__init__()
 
@@ -17,51 +16,72 @@ class MultiHumanRL(CADRL):
 
         """
         if self.phase is None:
-            raise AttributeError('Phase attribute has to be set!')
+            raise AttributeError("Phase attribute has to be set!")
         if self.device is None:
-            raise AttributeError('Device attributes has to be set!')
-        if self.phase == 'train' and self.epsilon is None:
-            raise AttributeError('Epsilon attribute has to be set in training phase')
+            raise AttributeError("Device attributes has to be set!")
+        if self.phase == "train" and self.epsilon is None:
+            raise AttributeError("Epsilon attribute has to be set in training phase")
 
         if self.reach_destination(state):
-            return ActionXY(0, 0) if self.kinematics == 'holonomic' else ActionRot(0, 0)
+            return ActionXY(0, 0) if self.kinematics == "holonomic" else ActionRot(0, 0)
         if self.action_space is None:
             self.build_action_space(state.self_state.v_pref)
 
         occupancy_maps = None
         probability = np.random.random()
-        if self.phase == 'train' and probability < self.epsilon:
+        if self.phase == "train" and probability < self.epsilon:
             max_action = self.action_space[np.random.choice(len(self.action_space))]
         else:
             self.action_values = list()
-            max_value = float('-inf')
+            max_value = float("-inf")
             max_action = None
             for action in self.action_space:
                 next_self_state = self.propagate(state.self_state, action)
                 if self.query_env:
-                    next_agent_states, reward, done, info = env.onestep_lookahead(action)
+                    next_agent_states, reward, done, info = env.onestep_lookahead(
+                        action
+                    )
                 else:
-                    next_agent_states = [self.propagate(agent_state, ActionXY(agent_state.vx, agent_state.vy))
-                                       for agent_state in state.agent_states]
+                    next_agent_states = [
+                        self.propagate(
+                            agent_state, ActionXY(agent_state.vx, agent_state.vy)
+                        )
+                        for agent_state in state.agent_states
+                    ]
                     reward = self.compute_reward(next_self_state, next_agent_states)
-                batch_next_states = torch.cat([torch.Tensor([next_self_state + next_agent_state]).to(self.device)
-                                              for next_agent_state in next_agent_states], dim=0)
+                batch_next_states = torch.cat(
+                    [
+                        torch.Tensor([next_self_state + next_agent_state]).to(
+                            self.device
+                        )
+                        for next_agent_state in next_agent_states
+                    ],
+                    dim=0,
+                )
                 rotated_batch_input = self.rotate(batch_next_states).unsqueeze(0)
                 if self.with_om:
                     if occupancy_maps is None:
-                        occupancy_maps = self.build_occupancy_maps(next_agent_states).unsqueeze(0)
-                    rotated_batch_input = torch.cat([rotated_batch_input, occupancy_maps.to(self.device)], dim=2)
+                        occupancy_maps = self.build_occupancy_maps(
+                            next_agent_states
+                        ).unsqueeze(0)
+                    rotated_batch_input = torch.cat(
+                        [rotated_batch_input, occupancy_maps.to(self.device)], dim=2
+                    )
                 # VALUE UPDATE
                 next_state_value = self.model(rotated_batch_input).data.item()
-                value = reward + pow(self.gamma, self.time_step * state.self_state.v_pref) * next_state_value
+                value = (
+                    reward
+                    + pow(self.gamma, self.time_step * state.self_state.v_pref)
+                    * next_state_value
+                )
                 self.action_values.append(value)
                 if value > max_value:
                     max_value = value
                     max_action = action
             if max_action is None:
-                raise ValueError('Value network is not well trained. ')
+                raise ValueError("Value network is not well trained. ")
 
-        if self.phase == 'train':
+        if self.phase == "train":
             self.last_state = self.transform(state)
 
         return max_action
@@ -69,10 +89,14 @@ class MultiHumanRL(CADRL):
     def compute_reward(self, nav, adults):
         # collision detection
         raise NotImplementedError
-        dmin = float('inf')
+        dmin = float("inf")
         collision = False
         for i, adult in enumerate(adults):
-            dist = np.linalg.norm((nav.px - adult.px, nav.py - adult.py)) - nav.radius - adult.radius
+            dist = (
+                np.linalg.norm((nav.px - adult.px, nav.py - adult.py))
+                - nav.radius
+                - adult.radius
+            )
             if dist < 0:
                 collision = True
                 break
@@ -108,17 +132,26 @@ class MultiHumanRL(CADRL):
         :param state:
         :return: tensor of shape (# of adults, len(state))
         """
-        state_tensor = torch.cat([torch.Tensor([state.self_state + agent_state]).to(self.device)
-                                  for agent_state in state.agent_states], dim=0)
+        state_tensor = torch.cat(
+            [
+                torch.Tensor([state.self_state + agent_state]).to(self.device)
+                for agent_state in state.agent_states
+            ],
+            dim=0,
+        )
         if self.with_om:
             occupancy_maps = self.build_occupancy_maps(state.agent_states)
-            state_tensor = torch.cat([self.rotate(state_tensor), occupancy_maps.to(self.device)], dim=1)
+            state_tensor = torch.cat(
+                [self.rotate(state_tensor), occupancy_maps.to(self.device)], dim=1
+            )
         else:
             state_tensor = self.rotate(state_tensor)
         return state_tensor
 
     def input_dim(self):
-        return self.joint_state_dim + (self.cell_num ** 2 * self.om_channel_size if self.with_om else 0)
+        return self.joint_state_dim + (
+            self.cell_num**2 * self.om_channel_size if self.with_om else 0
+        )
 
     def build_occupancy_maps(self, agent_states):
         """
@@ -128,9 +161,23 @@ class MultiHumanRL(CADRL):
         """
         occupancy_maps = []
         for adult in agent_states:
-            other_adults = np.concatenate([
-                np.array([(other_adult.px, other_adult.py, other_adult.vx, other_adult.vy)])
-                for other_adult in agent_states if other_adult != adult], axis=0)
+            other_adults = np.concatenate(
+                [
+                    np.array(
+                        [
+                            (
+                                other_adult.px,
+                                other_adult.py,
+                                other_adult.vx,
+                                other_adult.vy,
+                            )
+                        ]
+                    )
+                    for other_adult in agent_states
+                    if other_adult != adult
+                ],
+                axis=0,
+            )
             other_px = other_adults[:, 0] - adult.px
             other_py = other_adults[:, 1] - adult.py
             # new x-axis is in the direction of adult's velocity
@@ -144,24 +191,26 @@ class MultiHumanRL(CADRL):
             # compute indices of adults in the grid
             other_x_index = np.floor(other_px / self.cell_size + self.cell_num / 2)
             other_y_index = np.floor(other_py / self.cell_size + self.cell_num / 2)
-            other_x_index[other_x_index < 0] = float('-inf')
-            other_x_index[other_x_index >= self.cell_num] = float('-inf')
-            other_y_index[other_y_index < 0] = float('-inf')
-            other_y_index[other_y_index >= self.cell_num] = float('-inf')
+            other_x_index[other_x_index < 0] = float("-inf")
+            other_x_index[other_x_index >= self.cell_num] = float("-inf")
+            other_y_index[other_y_index < 0] = float("-inf")
+            other_y_index[other_y_index >= self.cell_num] = float("-inf")
             grid_indices = self.cell_num * other_y_index + other_x_index
-            occupancy_map = np.isin(range(self.cell_num ** 2), grid_indices)
+            occupancy_map = np.isin(range(self.cell_num**2), grid_indices)
             if self.om_channel_size == 1:
                 occupancy_maps.append([occupancy_map.astype(int)])
             else:
                 # calculate relative velocity for other agents
-                other_adult_velocity_angles = np.arctan2(other_adults[:, 3], other_adults[:, 2])
+                other_adult_velocity_angles = np.arctan2(
+                    other_adults[:, 3], other_adults[:, 2]
+                )
                 rotation = other_adult_velocity_angles - adult_velocity_angle
                 speed = np.linalg.norm(other_adults[:, 2:4], axis=1)
                 other_vx = np.cos(rotation) * speed
                 other_vy = np.sin(rotation) * speed
-                dm = [list() for _ in range(self.cell_num ** 2 * self.om_channel_size)]
+                dm = [list() for _ in range(self.cell_num**2 * self.om_channel_size)]
                 for i, index in np.ndenumerate(grid_indices):
-                    if index in range(self.cell_num ** 2):
+                    if index in range(self.cell_num**2):
                         if self.om_channel_size == 2:
                             dm[2 * int(index)].append(other_vx[i])
                             dm[2 * int(index) + 1].append(other_vy[i])
@@ -179,26 +228,25 @@ class MultiHumanRL(CADRL):
 
 
 class MultiHumanPolicy(MultiHumanRL):
-
     def __init__(self):
         super().__init__()
 
     def predict(self, state, env=None):
         if self.phase is None:
-            raise AttributeError('Phase attribute has to be set!')
+            raise AttributeError("Phase attribute has to be set!")
         if self.device is None:
-            raise AttributeError('Device attributes has to be set!')
-        if self.phase == 'train' and self.epsilon is None:
-            raise AttributeError('Epsilon attribute has to be set in training phase')
+            raise AttributeError("Device attributes has to be set!")
+        if self.phase == "train" and self.epsilon is None:
+            raise AttributeError("Epsilon attribute has to be set in training phase")
 
         if self.reach_destination(state):
-            return ActionXY(0, 0) if self.kinematics == 'holonomic' else ActionRot(0, 0)
+            return ActionXY(0, 0) if self.kinematics == "holonomic" else ActionRot(0, 0)
 
         self.last_state = self.transform(state)
 
         action = self.model(self.last_state.unsqueeze(0)).squeeze()
 
-        if self.kinematics == 'holonomic':
+        if self.kinematics == "holonomic":
             return ActionXY(action[0].item(), action[1].item())
         else:
             return ActionRot(action[0].item(), action[1].item())

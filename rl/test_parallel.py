@@ -13,7 +13,7 @@ from simulator.agents.robot import Robot
 from simulator.utils.info import *
 
 
-PHASE  = 'test'
+PHASE = "test"
 
 
 def average(input_list):
@@ -30,7 +30,7 @@ def run_episode_wrapper(args_tuple):
 
 def run_episode(args, env_config, policy_config_file, model_weights_path, episode):
     device = torch.device("cuda:0" if torch.cuda.is_available() and args.gpu else "cpu")
-    logging.info('Using device: %s', device)
+    logging.info("Using device: %s", device)
 
     policy = SARL()
     policy_config = configparser.RawConfigParser()
@@ -41,13 +41,13 @@ def run_episode(args, env_config, policy_config_file, model_weights_path, episod
             exit(1)
         policy.get_model().load_state_dict(torch.load(model_weights_path))
 
-    env = gym.make('EntityBasedCollisionAvoidance-v0')
+    env = gym.make("EntityBasedCollisionAvoidance-v0")
     env.configure(env_config)
     if args.square:
-        env.test_sim_adult = 'square_crossing'
+        env.test_sim_adult = "square_crossing"
     if args.circle:
-        env.test_sim_adult = 'circle_crossing'
-    robot = Robot(env_config, 'robot')
+        env.test_sim_adult = "circle_crossing"
+    robot = Robot(env_config, "robot")
     robot.set_policy(policy)
     env.set_robot(robot)
     policy.set_phase(PHASE)
@@ -109,12 +109,14 @@ def run_episode(args, env_config, policy_config_file, model_weights_path, episod
     elif isinstance(info, Timeout):
         timeout += 1
     else:
-        raise ValueError('Invalid end signal from environment')
+        raise ValueError("Invalid end signal from environment")
 
-    cumulative_reward = sum([
-        pow(policy.gamma, t * robot.time_step * robot.v_pref) * reward \
+    cumulative_reward = sum(
+        [
+            pow(policy.gamma, t * robot.time_step * robot.v_pref) * reward
             for t, reward in enumerate(rewards)
-    ])
+        ]
+    )
     result = {
         "episode": episode,
         "time": env.global_time,
@@ -131,7 +133,7 @@ def run_episode(args, env_config, policy_config_file, model_weights_path, episod
         "dist_to_goal": info.dist_to_goal,
         "dmin_adult": dmin_adult,
         "dmin_bicycle": dmin_bicycle,
-        "dmin_child": dmin_child
+        "dmin_child": dmin_child,
     }
     return result
 
@@ -143,8 +145,12 @@ def main():
 
     model_weights_path = None
     if args.model_dir is not None:
-        env_config_file = os.path.join(args.model_dir, os.path.basename(args.env_config))
-        policy_config_file = os.path.join(args.model_dir, os.path.basename(args.policy_config))
+        env_config_file = os.path.join(
+            args.model_dir, os.path.basename(args.env_config)
+        )
+        policy_config_file = os.path.join(
+            args.model_dir, os.path.basename(args.policy_config)
+        )
         model_weights_path = os.path.join(args.model_dir, args.model_name)
     else:
         env_config_file = args.env_config
@@ -154,8 +160,11 @@ def main():
         model_weights_path = args.model_path
 
     # configure logging and device
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s, %(levelname)s: %(message)s',
-                        datefmt="%Y-%m-%d %H:%M:%S")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s, %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     # configure environment
     env_config = configparser.RawConfigParser()
@@ -163,7 +172,10 @@ def main():
 
     t0 = time.time()
     episodes = range(args.start, args.end)
-    args_list = [(args, env_config, policy_config_file, model_weights_path, episode) for episode in episodes]
+    args_list = [
+        (args, env_config, policy_config_file, model_weights_path, episode)
+        for episode in episodes
+    ]
     # results = []
     # for args in args_list:
     #     results.append(run_episode(*args))
@@ -175,5 +187,5 @@ def main():
     print("time passed: ", time.time() - t0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
