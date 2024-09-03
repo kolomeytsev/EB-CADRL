@@ -6,7 +6,7 @@ import tempfile
 
 MODEL_WEIGHTS_PATH = "model_weights/sarl_model_baseline.pth"
 POLICY_CONFIG_PATH = "configs/test_configs/test_policy_configs/policy.config"
-ENV_CONFIG_PATH = "configs/test_configs/test_env_configs/env_humans_3_bikes_3_static_10.config"
+ENV_CONFIG_PATH = "configs/test_configs/test_env_configs/env_adults_3_bikes_3_static_10.config"
 CASE_ID = 2
 
 

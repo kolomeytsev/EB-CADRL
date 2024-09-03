@@ -10,7 +10,7 @@ class Robot(Agent):
         self.action_index = None
         self.attention_weights = None
         self.last_state = None
-        self.humans_in_FOV = None
+        self.adults_in_FOV = None
         self.agent_type = AgentType.ROBOT
 
     def act(self, ob, local_map=None, env=None):
@@ -27,5 +27,5 @@ class Robot(Agent):
     def get_reward(self, local_map):
         full_state = np.expand_dims(self.last_state, axis=0)
         self_state = np.expand_dims(self.last_state[0, 0:6], axis=0)
-        reward = self.policy.get_reward(full_state, self_state, local_map, self.humans_in_FOV)
+        reward = self.policy.get_reward(full_state, self_state, local_map, self.adults_in_FOV)
         return reward

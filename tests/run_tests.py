@@ -21,9 +21,9 @@ def print_test_results(results):
 def run_tests():
     results = {}
     test_configs = [
-        "configs/test_configs/test_env_configs/env_humans_3_bikes_3_static_2.config",
-        "configs/test_configs/test_env_configs/env_humans_3_bikes_3.config",
-        "configs/test_configs/test_env_configs/env_humans_5.config",
+        "configs/test_configs/test_env_configs/env_adults_3_bikes_3_static_2.config",
+        "configs/test_configs/test_env_configs/env_adults_3_bikes_3.config",
+        "configs/test_configs/test_env_configs/env_adults_5.config",
     ]
     for path in test_configs:
         test_name = path.split('/')[-1]
@@ -31,8 +31,8 @@ def run_tests():
 
     test_configs_scenes = [
         (
-            "configs/test_configs/test_env_configs/env_humans_3_bikes_3_static_10.config",
-            "test_scenes/test_scene_humans_3_bikes_3_static_10.json"
+            "configs/test_configs/test_env_configs/env_adults_3_bikes_3_static_10.config",
+            "tests/test_scenes/test_scene_adults_3_bikes_3_static_10.json"
         ),
     ]
     for env_config_path, scene_path in test_configs_scenes:

@@ -1,12 +1,12 @@
 import configparser
 import torch
 import gym
-from crowd_nav.policy.policy_factory import policy_factory
+from rl.policy.policy_factory import policy_factory
 from simulator.agents.robot import Robot
 
 
 def configure_env_policy_robot(env_config_path, policy_config_path, model_path=None, phase="test",
-                               device="cpu", policy="sarl", env_name="CrowdSimStatic-v0"):
+                               device="cpu", policy="sarl", env_name="EntityBasedCollisionAvoidance-v0"):
     env_config = configparser.RawConfigParser()
     env_config.read(env_config_path)
     env = gym.make(env_name)

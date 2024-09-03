@@ -122,7 +122,7 @@ class ORCAObstacles(Policy):
 
         self.sim.setAgentPrefVelocity(0, tuple(pref_vel))
         for i, agent_state in enumerate(agent_states_in_FOV):
-            # unknown goal position of other humans
+            # unknown goal position of other adults
             self.sim.setAgentPrefVelocity(i + 1, (0, 0))
 
         self.sim.doStep()
@@ -130,7 +130,7 @@ class ORCAObstacles(Policy):
         action = ActionRot(np.linalg.norm([action.vx, action.vy]), (np.arctan2(
             action.vy, action.vx) - self_state.theta))
         agent.last_state = state
-        self.humans_available = len(state.agent_states) > 0
+        self.adults_available = len(state.agent_states) > 0
 
         return action
 

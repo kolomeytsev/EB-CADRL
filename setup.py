@@ -2,13 +2,13 @@ from setuptools import setup
 
 
 setup(
-    name='crowdnav',
+    name='ebcadrl',
     version='0.0.1',
     packages=[
-        'crowd_nav',
+        'rl',
         'configs',
-        'crowd_nav.policy',
-        'crowd_nav.utils',
+        'rl.policy',
+        'rl.utils',
         'simulator',
         'simulator',
         'simulator.policy',

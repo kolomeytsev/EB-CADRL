@@ -1,13 +1,13 @@
 import pprint
 from simulator.utils.info import *
-from crowd_nav.train import configure_environment_and_robot, run_train
+from rl.train import configure_environment_and_robot, run_train
 import logging
 import sys
 import os
 import torch
 import time
 import configparser
-from crowd_nav.policy.policy_factory import policy_factory
+from rl.policy.policy_factory import policy_factory
 import collections
 import tempfile
 
@@ -52,7 +52,7 @@ def run_basic_train_with_output_dir(output_dir, env_config):
     policy.configure(policy_config)
     policy.set_device(device)
     
-    robot, env = configure_environment_and_robot(params, 'CrowdSimStatic-v0')
+    robot, env = configure_environment_and_robot(params, 'EntityBasedCollisionAvoidance-v0')
 
     t0 = time.time()
     explorer, episode = run_train(params, policy, env, robot)
@@ -70,7 +70,7 @@ def run_basic_train_with_output_dir(output_dir, env_config):
 
 
 def run_basic_train():
-    env_config = 'configs/test_configs/test_env_configs/env_humans_3_bikes_3_child_3_static_3_fast_train.config'
+    env_config = 'configs/test_configs/test_env_configs/env_adults_3_bikes_3_child_3_static_3_fast_train.config'
     with tempfile.TemporaryDirectory() as tmp_output_dir:
         print(tmp_output_dir)
         return run_basic_train_with_output_dir(tmp_output_dir, env_config)

@@ -11,7 +11,7 @@ from simulator.utils.utils import AgentType
 class Agent(object):
     def __init__(self, config, section):
         """
-        Base class for robot and human. Have the physical attributes of an agent.
+        Base class for robot and adult. Have the physical attributes of an agent.
         """
         self.visible = config.getboolean(section, 'visible')
         self.v_pref = config.getfloat(section, 'v_pref', fallback=None)

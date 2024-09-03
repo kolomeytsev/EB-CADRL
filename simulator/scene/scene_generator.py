@@ -4,7 +4,7 @@ import collections
 import logging
 import json
 
-from simulator.agents.agents import Human, Bicycle, BicycleRectangle, Child
+from simulator.agents.agents import Adult, Bicycle, BicycleRectangle, Child
 from simulator.utils.state import ObservableState
 from simulator.utils.utils import AgentType
 
@@ -30,8 +30,8 @@ class SceneGenerator:
             'test': config.getint('env', 'test_size')
         }
 
-        self.train_val_sim_human = config.get('sim', 'train_val_sim_human')
-        self.test_sim_human = config.get('sim', 'test_sim_human')
+        self.train_val_sim_adult = config.get('sim', 'train_val_sim_adult')
+        self.test_sim_adult = config.get('sim', 'test_sim_adult')
 
         self.train_val_sim_bicycle = config.get('sim', 'train_val_sim_bicycle', fallback=None)
         self.test_sim_bicycle = config.get('sim', 'test_sim_bicycle', fallback=None)
@@ -61,17 +61,15 @@ class SceneGenerator:
         else:
             self.other_robots_num = 0
 
-        # self.write_log()
-
     def set_agents_number(self, config):
-        self.human_num = config.getint('sim', 'human_num')
+        self.adult_num = config.getint('sim', 'adult_num')
         self.bicycle_num = config.getint('sim', 'bicycle_num', fallback=0)
         self.bicycle_type = config.get('sim', 'bicycle_type', fallback=None)
         self.children_num = config.getint('sim', 'children_num', fallback=0)
 
     def write_log(self):
-        logging.info('Training human simulation: {}, test simulation: {}'
-            .format(self.train_val_sim_human, self.test_sim_human))
+        logging.info('Training adult simulation: {}, test simulation: {}'
+            .format(self.train_val_sim_adult, self.test_sim_adult))
         logging.info('Training bicycle simulation: {}, test simulation: {}'
             .format(self.train_val_sim_bicycle, self.test_sim_bicycle))
         logging.info('Training children simulation: {}, test simulation: {}'
@@ -79,11 +77,11 @@ class SceneGenerator:
         logging.info('Square width: {}, circle width: {}'.format(self.square_width, self.circle_radius))
 
         if self.randomize_attributes:
-            logging.info("Randomize human's radius and preferred speed")
+            logging.info("Randomize adult's radius and preferred speed")
         else:
-            logging.info("Not randomize human's radius and preferred speed")
+            logging.info("Not randomize adult's radius and preferred speed")
 
-        logging.info('human number: {}'.format(self.human_num))
+        logging.info('adult number: {}'.format(self.adult_num))
         logging.info('bicycle number: {}'.format(self.bicycle_num))
         logging.info('children number: {}'.format(self.children_num))
         logging.info('robot number: {}'.format(self.other_robots_num))
@@ -207,10 +205,8 @@ class SceneGenerator:
             num_walls = config.getint('general', 'num_walls')
         else:
             if self.num_circles:
-                # num_circles = np.random.randint(1, self.num_circles + 1)
                 num_circles = self.num_circles
             if self.num_walls:
-                # num_walls = np.random.randint(1, self.num_walls + 1)
                 num_walls = self.num_walls
 
         self.final_num_circles = num_circles
@@ -220,12 +216,6 @@ class SceneGenerator:
         max_locations = int(round(grid_size))
 
         inflation_rate_il = 1
-        # Todo: delete? (hack have more distance to obstacles?)
-        # if phase == 'test':
-        #     inflation_rate_il = 1
-        # else:
-        #     inflation_rate_il = 1.25
-
         obstacles = []
         self.obstacle_vertices = []
         self.generate_circles(obstacles, num_circles, config, inflation_rate_il, max_locations, grid_size)
@@ -238,37 +228,18 @@ class SceneGenerator:
         self.obstacles = obstacles
 
     def generate_random_scene(self, counter_offset, phase, save_scene_path=None, scene_number=None):
-        # if self.randomize_attributes:
-        #     self.robot.sample_random_attributes()
-
-        """
-        circle_radius = self.circle_radius * \
-            min(self.robot.v_pref * 5, 1) * (1 + np.random.random() * 2)
-        if circle_radius > 9:
-            circle_radius = 9
-        self.last_circle_radius = circle_radius
-        self.robot.set(
-            0, -circle_radius, 0, circle_radius, 0, 0, np.pi / 2)
-
-        if imitation_learning:
-            human_num = self.human_num
-        else:
-            human_num = int(round(self.human_num * (0.5 + np.random.random())))
-        """
-
         if phase in ['train', 'val']:
-            human_num = self.human_num if self.robot.policy.multiagent_training else 1
-            human_rule = self.train_val_sim_human
+            adult_num = self.adult_num if self.robot.policy.multiagent_training else 1
+            adult_rule = self.train_val_sim_adult
 
-            # TODO make bicycle_num == 1 if not multiagent_training instead of 0
-            bicycle_num = self.bicycle_num if self.robot.policy.multiagent_training else 0
+            bicycle_num = self.bicycle_num if self.robot.policy.multiagent_training else 1
             bicycle_rule = self.train_val_sim_bicycle
 
             children_num = self.children_num if self.robot.policy.multiagent_training else 1
             children_rule = self.train_val_sim_children
         else:
-            human_num = self.human_num
-            human_rule = self.test_sim_human
+            adult_num = self.adult_num
+            adult_rule = self.test_sim_adult
 
             bicycle_num = self.bicycle_num
             bicycle_rule = self.test_sim_bicycle
@@ -281,9 +252,9 @@ class SceneGenerator:
             seed = scene_number
         else:
             seed = counter_offset[phase] + self.case_counter[phase]
-        print("seed:", seed)
+
         np.random.seed(seed)
-        self.generate_random_human_position(human_num=human_num, rule=human_rule)
+        self.generate_random_adult_position(adult_num=adult_num, rule=adult_rule)
         self.generate_random_bicycle_position(bicycle_num=bicycle_num, rule=bicycle_rule)
         self.generate_random_children_position(children_num=children_num, rule=children_rule)
         self.generate_static_map_input(self.map_size_m, phase)
@@ -297,7 +268,8 @@ class SceneGenerator:
     def create_observation_from_static_obstacles(self, obstacles):
         self.static_obstacles_as_pedestrians = []
         for index, obstacle in enumerate(obstacles):
-            if obstacle.dim[0] == obstacle.dim[1]:  # Obstacle is a square
+            if obstacle.dim[0] == obstacle.dim[1]:
+                # Obstacle is a square
                 px = (
                     self.obstacle_vertices[index][0][0] + self.obstacle_vertices[index][2][0]) / 2.0
                 py = (
@@ -305,8 +277,9 @@ class SceneGenerator:
                 radius = (
                     self.obstacle_vertices[index][0][0] - px) * np.sqrt(2)
                 self.static_obstacles_as_pedestrians.append(
-                    ObservableState(px, py, 0, 0, radius, AgentType.HUMAN_STATIC))
-            elif obstacle.dim[0] > obstacle.dim[1]:  # Obstacle is rectangle
+                    ObservableState(px, py, 0, 0, radius, AgentType.ADULT_STATIC))
+            elif obstacle.dim[0] > obstacle.dim[1]:
+                # Obstacle is rectangle
                 py = (
                     self.obstacle_vertices[index][0][1] + self.obstacle_vertices[index][2][1]) / 2.0
                 radius = (
@@ -314,9 +287,10 @@ class SceneGenerator:
                 px = self.obstacle_vertices[index][1][0] + radius
                 while px < self.obstacle_vertices[index][0][0]:
                     self.static_obstacles_as_pedestrians.append(
-                        ObservableState(px, py, 0, 0, radius, AgentType.HUMAN_STATIC))
+                        ObservableState(px, py, 0, 0, radius, AgentType.ADULT_STATIC))
                     px = px + 2 * radius
-            else:  # Obstacle is rectangle
+            else:
+                # Obstacle is rectangle
                 px = (
                     self.obstacle_vertices[index][0][0] + self.obstacle_vertices[index][2][0]) / 2.0
                 radius = (
@@ -324,7 +298,7 @@ class SceneGenerator:
                 py = self.obstacle_vertices[index][2][1] + radius
                 while py < self.obstacle_vertices[index][0][1]:
                     self.static_obstacles_as_pedestrians.append(
-                        ObservableState(px, py, 0, 0, radius, AgentType.HUMAN_STATIC))
+                        ObservableState(px, py, 0, 0, radius, AgentType.ADULT_STATIC))
                     py = py + 2 * radius
 
     def generate_random_bicycle_position(self, bicycle_num, rule):
@@ -353,7 +327,6 @@ class SceneGenerator:
         self.children = []
         for _ in range(children_num):
             if rule == 'circle_crossing':
-                # child = self.generate_circle_crossing_children()
                 pass
             elif rule == 'square_crossing':
                 child = Child(self.config, 'children')
@@ -363,93 +336,93 @@ class SceneGenerator:
 
             self.children.append(child)
 
-    def generate_static_humans(self, static_human_num, width, height):
-        for i in range(static_human_num):
+    def generate_static_adults(self, static_adult_num, width, height):
+        for i in range(static_adult_num):
             # randomly initialize static objects in a square of (width, height)
             if i == 0:
-                human = Human(self.config, 'humans')
-                human.set(-0.5, -2.5, -0.5, -2.5, 0, 0, 0)
-                self.humans.append(human)
+                adult = Adult(self.config, 'adults')
+                adult.set(-0.5, -2.5, -0.5, -2.5, 0, 0, 0)
+                self.adults.append(adult)
             else:
-                human = Human(self.config, 'humans')
+                adult = Adult(self.config, 'adults')
                 sign = np.random.choice([1, -1], p=[0.5, 0.5])
                 for _ in range(MAX_ITERATIONS_TO_GENERATE_AGENT):
                     px = np.random.random() * width * 0.5 * sign
                     py = (np.random.random() - 0.5) * height
                     collide = False
-                    for agent in [self.robot] + self.humans:
+                    for agent in [self.robot] + self.adults:
                         if norm((px - agent.px, py - agent.py)) < \
-                                                human.radius + agent.radius + self.discomfort_dist:
+                                                adult.radius + agent.radius + self.discomfort_dist:
                             collide = True
                             break
 
                     colide_with_goal = norm((px - self.robot.gx, py - self.robot.gy)) < \
-                                            human.radius + agent.radius + self.discomfort_dist
+                                            adult.radius + agent.radius + self.discomfort_dist
 
                     if not collide and not colide_with_goal:
                         break
 
-                human.set(px, py, px, py, 0, 0, 0)
-                self.humans.append(human)
+                adult.set(px, py, px, py, 0, 0, 0)
+                self.adults.append(adult)
 
-    def generate_dynamic_humans(self, dynamic_human_num):
-        for i in range(dynamic_human_num):
-            # the first 2 two humans will be in the circle crossing scenarios
-            # the rest humans will have a random starting and end position
-            if i < dynamic_human_num // 2:
-                human = self.generate_circle_crossing_human()
+    def generate_dynamic_adults(self, dynamic_adult_num):
+        for i in range(dynamic_adult_num):
+            # the first 2 two adults will be in the circle crossing scenarios
+            # the rest adults will have a random starting and end position
+            if i < dynamic_adult_num // 2:
+                adult = self.generate_circle_crossing_adult()
             else:
-                human = Human(self.config, 'humans')
-                self.generate_square_crossing_agent(human, self.humans)
-            self.humans.append(human)
+                adult = Adult(self.config, 'adults')
+                self.generate_square_crossing_agent(adult, self.adults)
+            self.adults.append(adult)
 
-    def generate_random_human_position(self, human_num, rule):
+    def generate_random_adult_position(self, adult_num, rule):
         """
-        Generate human position according to certain rule
+        Generate adult position according to certain rule
         Rule square_crossing: generate start/goal position at two sides of y-axis
         Rule circle_crossing: generate start position on a circle, goal position is at the opposite side
 
-        :param human_num: Number of humans to add
+        :param adult_num: Number of adults to add
         :param rule: square_crossing or circle_crossing
         :return:
         """
-        self.humans = []
+        self.adults = []
         # initial min separation distance to avoid danger penalty at beginning
         if rule == 'square_crossing':
-            for i in range(human_num):
-                human = Human(self.config, 'humans')
-                self.generate_square_crossing_agent(human, self.humans)
-                self.humans.append(human)
+            for i in range(adult_num):
+                adult = Adult(self.config, 'adults')
+                self.generate_square_crossing_agent(adult, self.adults)
+                self.adults.append(adult)
         elif rule == 'circle_crossing':
-            for i in range(human_num):
-                self.humans.append(self.generate_circle_crossing_human())
+            for i in range(adult_num):
+                self.adults.append(self.generate_circle_crossing_adult())
         elif rule == 'mixed':
             # mix different raining simulation with certain distribution
-            static_human_num = {
+            static_adult_num = {
                 0: 0.05, 1: 0.2, 2: 0.2, 3: 0.3, 4: 0.1, 5: 0.15
             }
-            dynamic_human_num = {
+            dynamic_adult_num = {
                 1: 0.3, 2: 0.3, 3: 0.2, 4: 0.1, 5: 0.1
             }
             static = True if np.random.random() < 0.2 else False
             prob = np.random.random()
-            for key, value in sorted(static_human_num.items() if static else dynamic_human_num.items()):
+            for key, value in sorted(static_adult_num.items() if static else dynamic_adult_num.items()):
                 if prob - value <= 0:
-                    human_num = key
+                    adult_num = key
                     break
                 else:
                     prob -= value
-            self.human_num = human_num
+            self.adult_num = adult_num
             if static:
                 # randomly initialize static objects in a square of (width, height)
                 width = 4
                 height = 8
-                if human_num == 0:
-                    human = Human(self.config, 'humans')
-                    human.set(0, -10, 0, -10, 0, 0, 0)
-                    self.humans.append(human)
-                for i in range(human_num):
-                    human = Human(self.config, 'humans')
+                if adult_num == 0:
+                    adult = Adult(self.config, 'adults')
+                    adult.set(0, -10, 0, -10, 0, 0, 0)
+                    self.adults.append(adult)
+                for i in range(adult_num):
+                    adult = Adult(self.config, 'adults')
                     if np.random.random() > 0.5:
                         sign = -1
                     else:
@@ -458,88 +431,65 @@ class SceneGenerator:
                         px = np.random.random() * width * 0.5 * sign
                         py = (np.random.random() - 0.5) * height
                         collide = False
-                        for agent in [self.robot] + self.humans:
+                        for agent in [self.robot] + self.adults:
                             if norm((px - agent.px, py - agent.py)) < \
-                                    human.radius + agent.radius + self.discomfort_dist:
+                                    adult.radius + agent.radius + self.discomfort_dist:
                                 collide = True
                                 break
                         if not collide:
                             break
-                    human.set(px, py, px, py, 0, 0, 0)
-                    self.humans.append(human)
+                    adult.set(px, py, px, py, 0, 0, 0)
+                    self.adults.append(adult)
             else:
-                # the first 2 two humans will be in the circle crossing scenarios
-                # the rest humans will have a random starting and end position
-                for i in range(human_num):
+                # the first 2 two adults will be in the circle crossing scenarios
+                # the rest adults will have a random starting and end position
+                for i in range(adult_num):
                     if i < 2:
-                        human = self.generate_circle_crossing_human()
+                        adult = self.generate_circle_crossing_adult()
                     else:
-                        human = Human(self.config, 'humans')
-                        self.generate_square_crossing_agent(human, self.humans)
-                    self.humans.append(human)
-        elif rule == 'mixed_2':
-            # mix different raining simulation with certain distribution
-            static_human_num = 6
-            dynamic_human_num = 6
-            self.human_num = static_human_num + dynamic_human_num
-            self.generate_static_humans(static_human_num, width=6, height=8)
-            self.generate_dynamic_humans(dynamic_human_num)
-
-            # static wall of humans
-            add_static_wall = False
-            radius = 0.15
-            if add_static_wall:
-                for i in range(10):
-                    human = Human(self.config, 'humans')
-                    human.radius = radius
-                    human.set(-2 + i * 2.1 * radius, 3, -2 + i * 2.1 * radius, 3, 0, 0, 0)
-                    self.humans.append(human)
-        elif rule == 'mixed_12':
-            static_human_num = np.random.randint(13)
-            dynamic_human_num = 12 - static_human_num
-            self.human_num = static_human_num + dynamic_human_num
-            self.generate_static_humans(static_human_num, width=6, height=8)
-            self.generate_dynamic_humans(dynamic_human_num)
+                        adult = Adult(self.config, 'adults')
+                        self.generate_square_crossing_agent(adult, self.adults)
+                    self.adults.append(adult)
         elif rule == 'mixed_20':
-            static_human_num = np.random.randint(20)
-            dynamic_human_num = 20 - static_human_num
-            self.human_num = static_human_num + dynamic_human_num
-            self.generate_static_humans(static_human_num, width=6, height=8)
-            self.generate_dynamic_humans(dynamic_human_num)
+            static_adult_num = np.random.randint(20)
+            dynamic_adult_num = 20 - static_adult_num
+            self.adult_num = static_adult_num + dynamic_adult_num
+            self.generate_static_adults(static_adult_num, width=6, height=8)
+            self.generate_dynamic_adults(dynamic_adult_num)
         elif rule == 'one_static':
-            human = Human(self.config, 'humans')
-            human.set(-2, -8, -2, -8, 0, 0, 0)
-            self.humans.append(human)
-            human = Human(self.config, 'humans')
-            human.set(-3, -8, -3, -8, 0, 0, 0)
-            self.humans.append(human)
+            adult = Adult(self.config, 'adults')
+            adult.set(-2, -8, -2, -8, 0, 0, 0)
+            self.adults.append(adult)
+            adult = Adult(self.config, 'adults')
+            adult.set(-3, -8, -3, -8, 0, 0, 0)
+            self.adults.append(adult)
         else:
             raise ValueError("Rule doesn't exist")
 
-    def generate_circle_crossing_human(self):
-        human = Human(self.config, 'humans')
+    def generate_circle_crossing_adult(self):
+        adult = Adult(self.config, 'adults')
         if self.randomize_attributes:
-            human.sample_random_attributes()
+            adult.sample_random_attributes()
 
         for _ in range(MAX_ITERATIONS_TO_GENERATE_AGENT):
             angle = np.random.random() * np.pi * 2
-            # add some noise to simulate all the possible cases robot could meet with human
+            # add some noise to simulate all the possible cases robot could meet with adult
             # TODO: Add noise
-            px_noise = 0 # (np.random.random() - 0.5) * human.v_pref
-            py_noise = 0 # (np.random.random() - 0.5) * human.v_pref
+            px_noise = 0 # (np.random.random() - 0.5) * adult.v_pref
+            py_noise = 0 # (np.random.random() - 0.5) * adult.v_pref
             px = self.circle_radius * np.cos(angle) + px_noise
             py = self.circle_radius * np.sin(angle) + py_noise
             collide = False
-            for agent in [self.robot] + self.humans:
-                min_dist = human.radius + agent.radius + self.discomfort_dist
+            for agent in [self.robot] + self.adults:
+                min_dist = adult.radius + agent.radius + self.discomfort_dist
                 if norm((px - agent.px, py - agent.py)) < min_dist or \
                         norm((px - agent.gx, py - agent.gy)) < min_dist:
                     collide = True
                     break
             if not collide:
                 break
-        human.set(px, py, -px, -py, 0, 0, 0)
-        return human
+        adult.set(px, py, -px, -py, 0, 0, 0)
+        return adult
 
     def generate_circle_crossing_bicycle(self):
         if self.bicycle_type == "rectangle":
@@ -615,7 +565,8 @@ class SceneGenerator:
                 goal_position = (np.random.uniform(-half_width, half_width), -half_width)
             elif goal_side == 'left':
                 goal_position = (-half_width, np.random.uniform(-half_width, half_width))
-            else:  # goal_side == 'right'
+            else:
+                # goal_side == 'right'
                 goal_position = (half_width, np.random.uniform(-half_width, half_width))
             gx, gy = goal_position
             break
@@ -700,13 +651,13 @@ class SceneGenerator:
         with open(load_scene_path, "r") as f:
             scene = json.load(f)
 
-        self.human_num = len(scene["humans"])        
-        self.humans = []
-        for i in range(self.human_num):
-            state = scene["humans"][i]
-            human = Human(self.config, 'humans')
-            human.set_from_state_dict(state)
-            self.humans.append(human)
+        self.adult_num = len(scene["adults"])        
+        self.adults = []
+        for i in range(self.adult_num):
+            state = scene["adults"][i]
+            adult = Adult(self.config, 'adults')
+            adult.set_from_state_dict(state)
+            self.adults.append(adult)
 
         self.bicycle_num = len(scene.get("bicycles", []))
         self.bicycles = []
@@ -753,13 +704,13 @@ class SceneGenerator:
 
     def save_scene(self, path):
         result = {
-            "humans": [],
+            "adults": [],
             "bicycles": [],
             "children": [],
             "map": []
         }
-        for human in self.humans:
-            result["humans"].append(human.get_state_dict())
+        for adult in self.adults:
+            result["adults"].append(adult.get_state_dict())
         for bicycle in self.bicycles:
             result["bicycles"].append(bicycle.get_state_dict())
         for child in self.children:

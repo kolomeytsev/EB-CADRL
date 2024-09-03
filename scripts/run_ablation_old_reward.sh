@@ -1,8 +1,8 @@
 #!/bin/bash
-export ENV_CONFIG="configs/env_configs/humans_8_bikes_8_child_8_static_3_35_sec_old_reward_ablation.config"
+export ENV_CONFIG="configs/env_configs/adults_8_bikes_8_child_8_static_3_35_sec_old_reward_ablation.config"
 export TRAIN_CONFIG="configs/train_configs/train_50k_8x.config"
 export POLICY_CONFIG="configs/policy_configs/policy_x2_no_agent_type.config"
-export OUTPUT_DIR="data/humans_8_bikes_8_child_8_static_3_35_sec_old_reward_ablation"
+export OUTPUT_DIR="data/adults_8_bikes_8_child_8_static_3_35_sec_old_reward_ablation"
 export STEP_SIZE=256
 
 python train.py --policy sarl --env_config $ENV_CONFIG --train_config $TRAIN_CONFIG --policy_config $POLICY_CONFIG --output_dir $OUTPUT_DIR --end_iteration $STEP_SIZE

@@ -5,14 +5,14 @@ from simulator.utils.utils import AgentType
 import numpy as np
 
 
-class Human(Agent):
+class Adult(Agent):
     def __init__(self, config, section):
         super().__init__(config, section)
-        self.agent_type = AgentType.HUMAN
+        self.agent_type = AgentType.ADULT
 
     def act(self, ob=None, global_map=None, local_map=None):
         """
-        The state for human is its full state and all other agents' observable states
+        The state for adult is its full state and all other agents' observable states
         :param ob:
         :return:
         """

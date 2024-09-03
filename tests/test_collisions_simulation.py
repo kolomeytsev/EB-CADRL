@@ -4,25 +4,25 @@ import pprint
 
 
 POLICY_CONFIG_PATH = "configs/test_configs/test_policy_configs/policy.config"
-PATH_PART = "test_scenes/test_collisions/"
+PATH_PART = "tests/test_scenes/test_collisions/"
 
-ENV_CONFIG_PATH_1 = "configs/test_configs/test_env_configs/env_humans_5_bikes_5_static_5.config"
+ENV_CONFIG_PATH_1 = "configs/test_configs/test_env_configs/env_adults_5_bikes_5_static_5.config"
 SCENE_RESULTS_1 = [
-    ("collision_with_human.json", CollisionHuman),
+    ("collision_with_adult.json", CollisionAdult),
     ("collision_with_bicycle.json", CollisionBicycle),
     ("collision_with_static.json", CollisionObstacle),
     ("no_collisions.json", ReachGoal)
 ]
 
-ENV_CONFIG_PATH_2 = "configs/test_configs/test_env_configs/env_humans_5_bikes_0_static_5.config"
+ENV_CONFIG_PATH_2 = "configs/test_configs/test_env_configs/env_adults_5_bikes_0_static_5.config"
 SCENE_RESULTS_2 = [
-    ("bikes_0_collision_with_human1.json", CollisionHuman),
-    ("bikes_0_collision_with_human2.json", CollisionHuman),
+    ("bikes_0_collision_with_adult_1.json", CollisionAdult),
+    ("bikes_0_collision_with_adult_2.json", CollisionAdult),
     ("bikes_0_no_collisions.json", ReachGoal)
 ]
 
 
-ENV_CONFIG_PATH_3 = "configs/test_configs/test_env_configs/env_humans_5_child_5_static_5.config"
+ENV_CONFIG_PATH_3 = "configs/test_configs/test_env_configs/env_adults_5_child_5_static_5.config"
 SCENE_RESULTS_3 = [
     ("collision_with_child.json", CollisionChild)
 ]

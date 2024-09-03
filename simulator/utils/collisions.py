@@ -26,25 +26,25 @@ def point_to_segment_dist(x1, y1, x2, y2, x3, y3):
     return np.linalg.norm((x - x3, y-y3))
 
 
-def compute_collision_agent_with_robot(human, robot, action, dmin, time_step):
+def compute_collision_agent_with_robot(agent, robot, action, dmin, time_step):
     """
-    Make human the center of coordinates: (0, 0)
+    Make agent the center of coordinates: (0, 0)
     shift robot by action from (px, py) to (ex, ey)
     compute distance from point (0, 0) to segment (px, py) - (ex, ey)
     """
-    px = human.px - robot.px
-    py = human.py - robot.py
+    px = agent.px - robot.px
+    py = agent.py - robot.py
     if robot.kinematics == 'holonomic':
-        vx = human.vx - action.vx
-        vy = human.vy - action.vy
+        vx = agent.vx - action.vx
+        vy = agent.vy - action.vy
     else:
-        vx = human.vx - action.v * np.cos(action.r + robot.theta)
-        vy = human.vy - action.v * np.sin(action.r + robot.theta)
+        vx = agent.vx - action.v * np.cos(action.r + robot.theta)
+        vy = agent.vy - action.v * np.sin(action.r + robot.theta)
     ex = px + vx * time_step
     ey = py + vy * time_step
 
     # closest distance between boundaries of two agents
-    closest_dist = point_to_segment_dist(px, py, ex, ey, 0, 0) - human.radius - robot.radius
+    closest_dist = point_to_segment_dist(px, py, ex, ey, 0, 0) - agent.radius - robot.radius
 
     collision = False
     if closest_dist < 0:

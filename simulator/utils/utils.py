@@ -6,10 +6,10 @@ from enum import IntEnum
 
 
 class AgentType(IntEnum):
-    HUMAN = 0
+    ADULT = 0
     BICYCLE = 1
     CHILD = 2
-    HUMAN_STATIC = 3
+    ADULT_STATIC = 3
     ROBOT = 4
 
 

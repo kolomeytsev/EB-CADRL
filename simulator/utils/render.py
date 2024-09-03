@@ -20,7 +20,7 @@ ARROW_COLOR = 'red'
 ARROW_STYLE = patches.ArrowStyle("->", head_length=8, head_width=8)
 
 
-def render_trajectory(states, humans_to_render, bicycles_to_render, children_to_render, robot_radius, time_step,
+def render_trajectory(states, adults_to_render, bicycles_to_render, children_to_render, robot_radius, time_step,
         obstacle_vertices, last_circle_radius):
     fig, ax = plt.subplots(figsize=(8.5, 8.5))
     ax.tick_params(labelsize=20)
@@ -31,8 +31,8 @@ def render_trajectory(states, humans_to_render, bicycles_to_render, children_to_
 
     robot_positions = [states[i][0].position for i in range(len(states))]
 
-    human_positions = [[state[1][j].position for j in range(
-        len(humans_to_render))] for state in states]
+    adult_positions = [[state[1][j].position for j in range(
+        len(adults_to_render))] for state in states]
 
     bicycle_positions = [[state[2][j].position for j in range(
         len(bicycles_to_render))] for state in states]
@@ -48,11 +48,11 @@ def render_trajectory(states, humans_to_render, bicycles_to_render, children_to_
                 fill=True,
                 color=ROBOT_COLOR)
 
-            humans = [plt.Circle(human_positions[k][i], humans_to_render[i].radius, fill=False, color=CMAP(
-                a)) for i, a in zip(range(len(humans_to_render)), range(len(humans_to_render)))]
+            adults = [plt.Circle(adult_positions[k][i], adults_to_render[i].radius, fill=False, color=CMAP(
+                a)) for i, a in zip(range(len(adults_to_render)), range(len(adults_to_render)))]
             ax.add_artist(robot)
-            for human in humans:
-                ax.add_artist(human)
+            for adult in adults:
+                ax.add_artist(adult)
 
             bicycles = [plt.Circle(bicycle_positions[k][i], bicycles_to_render[i].radius, fill=False, color=CMAP(
                 a)) for i, a in zip(range(len(bicycles_to_render)), range(len(bicycles_to_render)))]
@@ -67,7 +67,7 @@ def render_trajectory(states, humans_to_render, bicycles_to_render, children_to_
         # add time annotation
         global_time = k * time_step
         if global_time % 4 == 0 or k == len(states) - 1:
-            agents = humans + [robot]
+            agents = adults + [robot]
             times = list()
             for i in range(len(agents)):
                 if global_time > 0 and norm(
@@ -90,15 +90,15 @@ def render_trajectory(states, humans_to_render, bicycles_to_render, children_to_
             nav_direction = plt.Line2D((states[k - 1][0].px, states[k][0].px),
                                         (states[k - 1][0].py, states[k][0].py),
                                         color=ROBOT_COLOR, ls='solid')
-            human_directions = [plt.Line2D((states[k - 1][1][i].px,
+            adult_directions = [plt.Line2D((states[k - 1][1][i].px,
                                             states[k][1][i].px),
                                             (states[k - 1][1][i].py,
                                             states[k][1][i].py),
                                             color=CMAP(i),
-                                            ls='solid') for i in range(len(humans_to_render))]
+                                            ls='solid') for i in range(len(adults_to_render))]
             ax.add_artist(nav_direction)
-            for human_direction in human_directions:
-                ax.add_artist(human_direction)
+            for adult_direction in adult_directions:
+                ax.add_artist(adult_direction)
     obstacles = [plt.Polygon(obstacle_vertex)
                     for obstacle_vertex in obstacle_vertices]
 
@@ -112,8 +112,8 @@ def render_trajectory(states, humans_to_render, bicycles_to_render, children_to_
     fig2 = plt.figure()
     plt.axis('off')
     plt.legend(
-        [goal] + [robot] + [human for human in humans], ['Goal'] + ['Robot'] + \
-        ['Human ' + str(i) for i in range(len(humans))], fontsize=22, loc=3)
+        [goal] + [robot] + [adult for adult in adults], ['Goal'] + ['Robot'] + \
+        ['Adult ' + str(i) for i in range(len(adults))], fontsize=22, loc=3)
     plt.show()
 
 
@@ -175,7 +175,7 @@ def render_am(frame, states, obstacle_vertices, local_maps_angular, angular_map_
     plt.show()
 
 
-def render_traj_3D(states, last_circle_radius, humans_to_render):
+def render_traj_3D(states, last_circle_radius, adults_to_render):
     """
     Ox: Meters
     Oy: Meters
@@ -191,16 +191,16 @@ def render_traj_3D(states, last_circle_radius, humans_to_render):
     ax.set_zlabel('Timestep', fontsize=22)
 
     robot_positions = [states[i][0].position for i in range(len(states))]
-    human_positions = [[states[i][1][j].position for j in range(
-        len(humans_to_render))] for i in range(len(states))]
+    adult_positions = [[states[i][1][j].position for j in range(
+        len(adults_to_render))] for i in range(len(states))]
     for k in range(len(states)):
         if k % 4 == 0 or k == len(states) - 1:
             robot = (robot_positions[k][0], robot_positions[k][1], k)
-            humans = [(human_positions[k][i][0], human_positions[k][i][1], k)
-                        for i, a in zip(range(len(humans_to_render)), range(len(humans_to_render)))]
+            adults = [(adult_positions[k][i][0], adult_positions[k][i][1], k)
+                        for i, a in zip(range(len(adults_to_render)), range(len(adults_to_render)))]
             ax.scatter(robot[0], robot[1], robot[2], c=CMAP(0))
-            for i, human in enumerate(humans):
-                ax.scatter(human[0], human[1], human[2], c=CMAP(i + 1))
+            for i, adult in enumerate(adults):
+                ax.scatter(adult[0], adult[1], adult[2], c=CMAP(i + 1))
     goal = lines.Line2D([0],
                         [last_circle_radius],
                         color=GOAL_COLOR,
@@ -264,9 +264,9 @@ def render_og(frame, states, obstacle_vertices, use_grid_map, local_maps, submap
     plt.show()
 
 
-def render_video(states, last_circle_radius, robot_radius, humans_to_render, bicycles_to_render,
+def render_video(states, last_circle_radius, robot_radius, adults_to_render, bicycles_to_render,
                  children_to_render, static_obstacles_as_pedestrians, local_maps, use_grid_map, obstacle_vertices,
-                 robot_kinematics, human_num, submap_size_m, map_resolution, time_step,
+                 robot_kinematics, adult_num, submap_size_m, map_resolution, time_step,
                  angular_map_max_angle, angular_map_min_angle, angular_map_dim, angular_map_max_range,
                  local_maps_angular, other_robots_to_render, attention_weights,
                  output_file=None, deconv=None, plot_agents_goals_flag=True):
@@ -314,37 +314,37 @@ def render_video(states, last_circle_radius, robot_radius, humans_to_render, bic
         return agents_goal
 
     if plot_agents_goals_flag:
-        plot_agents_goals(ax, humans_to_render, 'tab:blue')
+        plot_agents_goals(ax, adults_to_render, 'tab:blue')
         plot_agents_goals(ax, bicycles_to_render, 'tab:cyan')
         plot_agents_goals(ax, children_to_render, 'tab:green')
 
-    HUMAN_STATE_INDEX = 1
+    ADULT_STATE_INDEX = 1
     BICYCLE_STATE_INDEX = 2
     CHILD_STATE_INDEX = 3
 
-    # humans
-    human_positions = [[state[HUMAN_STATE_INDEX][j].position for j in range(
-        len(humans_to_render))] for state in states]
-    humans = [plt.Circle(human_positions[0][i],
-        humans_to_render[i].radius,
+    # adults
+    adult_positions = [[state[ADULT_STATE_INDEX][j].position for j in range(
+        len(adults_to_render))] for state in states]
+    adults = [plt.Circle(adult_positions[0][i],
+        adults_to_render[i].radius,
         fill=True,
         edgecolor="k",
         facecolor="tab:blue"
-        ) for i in range(len(humans_to_render))]
-    legends.append(humans[0])
-    human_numbers = [
+        ) for i in range(len(adults_to_render))]
+    legends.append(adults[0])
+    adult_numbers = [
         plt.text(
-            humans[i].center[0] - X_OFFSET,
-            humans[i].center[1] - Y_OFFSET,
+            adults[i].center[0] - X_OFFSET,
+            adults[i].center[1] - Y_OFFSET,
             str(i),
             color='black',
             fontsize=22
-        ) for i in range(len(humans_to_render))
+        ) for i in range(len(adults_to_render))
     ]
 
-    for i, human in enumerate(humans):
-        ax.add_artist(human)
-        ax.add_artist(human_numbers[i])
+    for i, adult in enumerate(adults):
+        ax.add_artist(adult)
+        ax.add_artist(adult_numbers[i])
 
     # bicycles
     bicycle_positions = [[state[BICYCLE_STATE_INDEX][j].position for j in range(
@@ -426,8 +426,8 @@ def render_video(states, last_circle_radius, robot_radius, humans_to_render, bic
     """
 
     #if static_obstacles_as_pedestrians is not None:
-    #    for human in static_obstacles_as_pedestrians:
-    #        circle = plt.Circle(human.position, human.radius, color='r', fill=False)
+    #    for adult in static_obstacles_as_pedestrians:
+    #        circle = plt.Circle(adult.position, adult.radius, color='r', fill=False)
     #        plt.gca().add_patch(circle)
 
     obstacles = [plt.Polygon(obstacle_vertex, color="tab:gray")
@@ -450,22 +450,22 @@ def render_video(states, last_circle_radius, robot_radius, humans_to_render, bic
     # compute orientation in each step and use arrow to show the
     # direction
     radius = robot_radius
-    orientations_humans = [
+    orientations_adults = [
         [
             ((state[1][j].px,
                 state[1][j].py),
                 (state[1][j].px +
                     1.5 *
-                    humans_to_render[j].radius *
+                    adults_to_render[j].radius *
                     np.cos(
                     state[1][j].theta),
                     state[1][j].py +
                     1.5 *
-                    humans_to_render[j].radius *
+                    adults_to_render[j].radius *
                     np.sin(
                     state[1][j].theta))) for state in states] for j in range(
             len(
-                humans_to_render))]
+                adults_to_render))]
     """orientations_other_robots = [
         [
             ((state[2][j].px,
@@ -499,7 +499,7 @@ def render_video(states, last_circle_radius, robot_radius, humans_to_render, bic
     arrow_self = patches.FancyArrowPatch(
         *orientation_self[0], color=ARROW_COLOR, arrowstyle=ARROW_STYLE)
     ax.add_artist(arrow_self)
-    orientations = orientations_humans
+    orientations = orientations_adults
     # orientations.extend(orientations_other_robots)
     arrows_others = [
         patches.FancyArrowPatch(
@@ -518,7 +518,7 @@ def render_video(states, last_circle_radius, robot_radius, humans_to_render, bic
         orientations = [orientation]
     else:
         orientations = []
-        for i in range(human_num + 1):
+        for i in range(adult_num + 1):
             orientation = []
             for state in states:
                 if i == 0:
@@ -597,13 +597,13 @@ def render_video(states, last_circle_radius, robot_radius, humans_to_render, bic
 
         global_step = frame_num
         robot.center = robot_positions[frame_num]
-        for i, human in enumerate(humans):
-            human.center = human_positions[frame_num][i]
-            human_numbers[i].set_position(
-                (human.center[0] - X_OFFSET, human.center[1] - Y_OFFSET))
+        for i, adult in enumerate(adults):
+            adult.center = adult_positions[frame_num][i]
+            adult_numbers[i].set_position(
+                (adult.center[0] - X_OFFSET, adult.center[1] - Y_OFFSET))
             # if attention_weights is not None:
-            #    human.set_color(str(attention_weights[frame_num][i]))
-            #    attention_scores[i].set_text('human {}: {:.2f}'.format(i, attention_weights[frame_num][i]))
+            #    adult.set_color(str(attention_weights[frame_num][i]))
+            #    attention_scores[i].set_text('adult {}: {:.2f}'.format(i, attention_weights[frame_num][i]))
         
         for i, bicycle in enumerate(bicycles):
             bicycle.center = bicycle_positions[frame_num][i]
