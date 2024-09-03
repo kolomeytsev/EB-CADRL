@@ -14,121 +14,134 @@ class TestCollisionAgentWithRobot(unittest.TestCase):
         env_config = configparser.RawConfigParser()
         env_config.read(ENV_CONFIG_PATH)
 
-        robot = Robot(env_config, 'robot')
+        robot = Robot(env_config, "robot")
         robot.kinematics = "holonomic"
         robot.set(0, 0, 0, 0, 0, 0, np.pi / 2)
         robot.radius = 1
-        adult = Adult(env_config, 'adults')
+        adult = Adult(env_config, "adults")
         adult.set(0, -2, 0, -2, 0, 0, 0)
         adult.radius = 0.9
 
         time_step = 0.07
         robot.time_step = time_step
-        dmin = float('inf')
+        dmin = float("inf")
         action = ActionXY(-1, -1)
 
-        result = compute_collision_agent_with_robot(adult, robot, action, dmin, time_step)
+        result = compute_collision_agent_with_robot(
+            adult, robot, action, dmin, time_step
+        )
         self.assertEqual(result[1], False)
 
     def test_collision_1(self):
         env_config = configparser.RawConfigParser()
         env_config.read(ENV_CONFIG_PATH)
 
-        robot = Robot(env_config, 'robot')
+        robot = Robot(env_config, "robot")
         robot.kinematics = "holonomic"
         robot.set(0, 0, 0, 0, 0, 0, np.pi / 2)
         robot.radius = 1
-        adult = Adult(env_config, 'adults')
+        adult = Adult(env_config, "adults")
         adult.set(0, -2, 0, -2, 0, 0, 0)
         adult.radius = 0.9
 
         time_step = 0.12
         robot.time_step = time_step
-        dmin = float('inf')
+        dmin = float("inf")
         action = ActionXY(-1, -1)
 
-        result = compute_collision_agent_with_robot(adult, robot, action, dmin, time_step)
+        result = compute_collision_agent_with_robot(
+            adult, robot, action, dmin, time_step
+        )
         self.assertEqual(result[1], True)
 
     def test_no_collision_2(self):
         env_config = configparser.RawConfigParser()
         env_config.read(ENV_CONFIG_PATH)
 
-        robot = Robot(env_config, 'robot')
+        robot = Robot(env_config, "robot")
         robot.kinematics = "holonomic"
         robot.set(0, 0, 0, 0, 0, 0, np.pi / 2)
         robot.radius = 1
-        adult = Adult(env_config, 'adults')
+        adult = Adult(env_config, "adults")
         adult.set(0, -2, 0, -2, 0, 0, 0)
         adult.radius = 0.9
 
         time_step = 1
         robot.time_step = time_step
-        dmin = float('inf')
+        dmin = float("inf")
         action = ActionXY(1, 1)
 
-        result = compute_collision_agent_with_robot(adult, robot, action, dmin, time_step)
+        result = compute_collision_agent_with_robot(
+            adult, robot, action, dmin, time_step
+        )
         self.assertEqual(result[1], False)
 
     def test_no_collision_3(self):
         env_config = configparser.RawConfigParser()
         env_config.read(ENV_CONFIG_PATH)
 
-        robot = Robot(env_config, 'robot')
+        robot = Robot(env_config, "robot")
         robot.kinematics = "holonomic"
         robot.set(0, 0, 0, 0, 0, 0, np.pi / 2)
         robot.radius = 1
-        adult = Adult(env_config, 'adults')
+        adult = Adult(env_config, "adults")
         adult.set(1, -2, 1, -2, 0, 0, 0)
         adult.radius = 1
 
         time_step = 0.17
         robot.time_step = time_step
-        dmin = float('inf')
+        dmin = float("inf")
         action = ActionXY(1, -1)
 
-        result = compute_collision_agent_with_robot(adult, robot, action, dmin, time_step)
+        result = compute_collision_agent_with_robot(
+            adult, robot, action, dmin, time_step
+        )
         self.assertEqual(result[1], False)
 
     def test_collision_2(self):
         env_config = configparser.RawConfigParser()
         env_config.read(ENV_CONFIG_PATH)
 
-        robot = Robot(env_config, 'robot')
+        robot = Robot(env_config, "robot")
         robot.kinematics = "holonomic"
         robot.set(0, 0, 0, 0, 0, 0, np.pi / 2)
         robot.radius = 1
-        adult = Adult(env_config, 'adults')
+        adult = Adult(env_config, "adults")
         adult.set(1, -2, 1, -2, 0, 0, 0)
         adult.radius = 1
 
         time_step = 0.18
         robot.time_step = time_step
-        dmin = float('inf')
+        dmin = float("inf")
         action = ActionXY(1, -1)
 
-        result = compute_collision_agent_with_robot(adult, robot, action, dmin, time_step)
+        result = compute_collision_agent_with_robot(
+            adult, robot, action, dmin, time_step
+        )
         self.assertEqual(result[1], True)
 
     def test_collision_3(self):
         env_config = configparser.RawConfigParser()
         env_config.read(ENV_CONFIG_PATH)
 
-        robot = Robot(env_config, 'robot')
+        robot = Robot(env_config, "robot")
         robot.kinematics = "holonomic"
         robot.set(1, 4, 0, 0, 0, 0, np.pi / 2)
         robot.radius = 1
-        adult = Adult(env_config, 'adults')
+        adult = Adult(env_config, "adults")
         adult.set(3, 5, 0, 0, 0, 0, 0)
         adult.radius = 1.2
 
         time_step = 1.178
         robot.time_step = time_step
-        dmin = float('inf')
+        dmin = float("inf")
         action = ActionXY(1, -1)
 
-        result = compute_collision_agent_with_robot(adult, robot, action, dmin, time_step)
+        result = compute_collision_agent_with_robot(
+            adult, robot, action, dmin, time_step
+        )
         self.assertEqual(result[1], True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

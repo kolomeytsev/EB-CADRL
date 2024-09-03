@@ -4,6 +4,7 @@ from simulator.utils.action import ActionXY, ActionRot, ActionXYRot
 from simulator.utils.info import *
 import logging
 
+
 def compute_time_reward(x, time_max, time_good):
     if x < time_good:
         return 1
@@ -14,45 +15,80 @@ def compute_time_reward(x, time_max, time_good):
 
 
 class Reward:
-
     def __init__(self, config):
-        self.new_reward = config.getboolean('reward', 'new_reward', fallback=False)
-        self.time_max = config.getfloat('reward', 'time_max', fallback=None)
-        self.max_goal_distance = config.getfloat('reward', 'max_goal_distance', fallback=None)
+        self.new_reward = config.getboolean("reward", "new_reward", fallback=False)
+        self.time_max = config.getfloat("reward", "time_max", fallback=None)
+        self.max_goal_distance = config.getfloat(
+            "reward", "max_goal_distance", fallback=None
+        )
 
-        self.time_good = config.getfloat('reward', 'time_good', fallback=10.0)
-        self.success_reward = config.getfloat('reward', 'success_reward')
-        self.collision_penalty_adult = config.getfloat('reward', 'collision_penalty_adult', fallback=None)
-        self.collision_penalty_bicycle = config.getfloat('reward', 'collision_penalty_bicycle', fallback=None)
-        self.collision_penalty_obstacle = config.getfloat('reward', 'collision_penalty_obstacle', fallback=None)
-        self.collision_penalty_child = config.getfloat('reward', 'collision_penalty_child', fallback=None)
+        self.time_good = config.getfloat("reward", "time_good", fallback=10.0)
+        self.success_reward = config.getfloat("reward", "success_reward")
+        self.collision_penalty_adult = config.getfloat(
+            "reward", "collision_penalty_adult", fallback=None
+        )
+        self.collision_penalty_bicycle = config.getfloat(
+            "reward", "collision_penalty_bicycle", fallback=None
+        )
+        self.collision_penalty_obstacle = config.getfloat(
+            "reward", "collision_penalty_obstacle", fallback=None
+        )
+        self.collision_penalty_child = config.getfloat(
+            "reward", "collision_penalty_child", fallback=None
+        )
 
-        self.discomfort_dist = config.getfloat('reward', 'discomfort_dist')
-        self.discomfort_dist_adult = config.getfloat('reward', 'discomfort_dist_adult',
-                                                     fallback=self.discomfort_dist)
-        self.discomfort_dist_bicycle = config.getfloat('reward', 'discomfort_dist_bicycle',
-                                                       fallback=self.discomfort_dist)
-        self.discomfort_dist_child = config.getfloat('reward', 'discomfort_dist_child',
-                                                     fallback=self.discomfort_dist)
+        self.discomfort_dist = config.getfloat("reward", "discomfort_dist")
+        self.discomfort_dist_adult = config.getfloat(
+            "reward", "discomfort_dist_adult", fallback=self.discomfort_dist
+        )
+        self.discomfort_dist_bicycle = config.getfloat(
+            "reward", "discomfort_dist_bicycle", fallback=self.discomfort_dist
+        )
+        self.discomfort_dist_child = config.getfloat(
+            "reward", "discomfort_dist_child", fallback=self.discomfort_dist
+        )
 
-        self.discomfort_penalty_factor = config.getfloat('reward', 'discomfort_penalty_factor')
-        self.discomfort_penalty_factor_adult = config.getfloat('reward', 'discomfort_penalty_factor_adult',
-                                                               fallback=self.discomfort_penalty_factor)
-        self.discomfort_penalty_factor_bicycle = config.getfloat('reward', 'discomfort_penalty_factor_bicycle',
-                                                                 fallback=self.discomfort_penalty_factor)
-        self.discomfort_penalty_factor_child = config.getfloat('reward', 'discomfort_penalty_factor_child',
-                                                               fallback=self.discomfort_penalty_factor)
+        self.discomfort_penalty_factor = config.getfloat(
+            "reward", "discomfort_penalty_factor"
+        )
+        self.discomfort_penalty_factor_adult = config.getfloat(
+            "reward",
+            "discomfort_penalty_factor_adult",
+            fallback=self.discomfort_penalty_factor,
+        )
+        self.discomfort_penalty_factor_bicycle = config.getfloat(
+            "reward",
+            "discomfort_penalty_factor_bicycle",
+            fallback=self.discomfort_penalty_factor,
+        )
+        self.discomfort_penalty_factor_child = config.getfloat(
+            "reward",
+            "discomfort_penalty_factor_child",
+            fallback=self.discomfort_penalty_factor,
+        )
 
-        self.rotation_penalty_factor = config.getfloat('reward', 'rotation_penalty_factor')
+        self.rotation_penalty_factor = config.getfloat(
+            "reward", "rotation_penalty_factor"
+        )
 
-        self.time_step = config.getfloat('env', 'time_step')
-        self.time_limit = config.getint('env', 'time_limit')
+        self.time_step = config.getfloat("env", "time_step")
+        self.time_limit = config.getint("env", "time_limit")
 
     def set_robot(self, robot):
         self.robot = robot
 
-    def compute(self, dmin_adult, dmin_bicycle, dmin_child, collision_adult, collision_bicycle,
-                collision_obstacle, collision_child, action, global_time):
+    def compute(
+        self,
+        dmin_adult,
+        dmin_bicycle,
+        dmin_child,
+        collision_adult,
+        collision_bicycle,
+        collision_obstacle,
+        collision_child,
+        action,
+        global_time,
+    ):
         end_position = np.array(self.robot.compute_position(action, self.time_step))
         dist_to_goal = norm(end_position - np.array(self.robot.get_goal_position()))
         reaching_goal = dist_to_goal < self.robot.radius
@@ -90,7 +126,9 @@ class Reward:
         #     info = CollisionOtherAgent()
         elif reaching_goal:
             if self.new_reward:
-                time_reward = compute_time_reward(global_time, self.time_max, self.time_good)
+                time_reward = compute_time_reward(
+                    global_time, self.time_max, self.time_good
+                )
                 # Goal Proximity Reward == 1
                 reward += time_reward
             else:
@@ -98,19 +136,40 @@ class Reward:
             done = True
             info = ReachGoal(dist_to_goal, dmin_adult, dmin_bicycle, dmin_child)
         elif dmin_child < self.discomfort_dist_child:
-            reward = (dmin_child - self.discomfort_dist_child) * self.discomfort_penalty_factor_child * self.time_step
+            reward = (
+                (dmin_child - self.discomfort_dist_child)
+                * self.discomfort_penalty_factor_child
+                * self.time_step
+            )
             done = False
-            info = Danger(dmin_child, dist_to_goal, dmin_adult, dmin_bicycle, dmin_child)
+            info = Danger(
+                dmin_child, dist_to_goal, dmin_adult, dmin_bicycle, dmin_child
+            )
         elif dmin_bicycle < self.discomfort_dist_bicycle:
-            reward = (dmin_bicycle - self.discomfort_dist_bicycle) * self.discomfort_penalty_factor_bicycle * self.time_step
+            reward = (
+                (dmin_bicycle - self.discomfort_dist_bicycle)
+                * self.discomfort_penalty_factor_bicycle
+                * self.time_step
+            )
             done = False
-            info = Danger(dmin_bicycle, dist_to_goal, dmin_adult, dmin_bicycle, dmin_child)
+            info = Danger(
+                dmin_bicycle, dist_to_goal, dmin_adult, dmin_bicycle, dmin_child
+            )
         elif dmin_adult < self.discomfort_dist_adult:
-            reward = (dmin_adult - self.discomfort_dist_adult) * self.discomfort_penalty_factor_adult * self.time_step
+            reward = (
+                (dmin_adult - self.discomfort_dist_adult)
+                * self.discomfort_penalty_factor_adult
+                * self.time_step
+            )
             done = False
-            info = Danger(dmin_adult, dist_to_goal, dmin_adult, dmin_bicycle, dmin_child)
-        elif (isinstance(action, ActionRot) or isinstance(action, ActionXYRot)) and \
-                abs(action.r) > 0 and self.rotation_penalty_factor != 0:
+            info = Danger(
+                dmin_adult, dist_to_goal, dmin_adult, dmin_bicycle, dmin_child
+            )
+        elif (
+            (isinstance(action, ActionRot) or isinstance(action, ActionXYRot))
+            and abs(action.r) > 0
+            and self.rotation_penalty_factor != 0
+        ):
             reward = abs(action.r) * self.rotation_penalty_factor
             done = False
             info = Nothing(dmin_adult, dmin_bicycle, dmin_child)

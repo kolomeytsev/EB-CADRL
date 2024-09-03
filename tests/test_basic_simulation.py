@@ -9,8 +9,9 @@ CASE_ID = 2
 
 def run_basic_simulation(config_path):
     env, policy, robot = configure_env_policy_robot(
-        config_path, POLICY_CONFIG_PATH, MODEL_WEIGHTS_PATH)
-    ob, local_map = env.reset('test', test_case=CASE_ID)
+        config_path, POLICY_CONFIG_PATH, MODEL_WEIGHTS_PATH
+    )
+    ob, local_map = env.reset("test", test_case=CASE_ID)
 
     done = False
     while not done:
@@ -18,7 +19,5 @@ def run_basic_simulation(config_path):
         ob, local_map_new, reward, done, info = env.step(action)
 
     success = isinstance(info, ReachGoal)
-    result = {
-        "info": str(info)
-    }
+    result = {"info": str(info)}
     return success, result

@@ -15,7 +15,7 @@ class Robot(Agent):
 
     def act(self, ob, local_map=None, env=None):
         if self.policy is None:
-            raise AttributeError('Policy attribute has to be set!')
+            raise AttributeError("Policy attribute has to be set!")
         state = JointState(self.get_full_state(), ob)
         if local_map is not None:
             # action = self.policy.predict(state, local_map, self)
@@ -27,5 +27,7 @@ class Robot(Agent):
     def get_reward(self, local_map):
         full_state = np.expand_dims(self.last_state, axis=0)
         self_state = np.expand_dims(self.last_state[0, 0:6], axis=0)
-        reward = self.policy.get_reward(full_state, self_state, local_map, self.adults_in_FOV)
+        reward = self.policy.get_reward(
+            full_state, self_state, local_map, self.adults_in_FOV
+        )
         return reward

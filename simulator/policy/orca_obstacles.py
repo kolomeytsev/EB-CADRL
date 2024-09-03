@@ -56,7 +56,7 @@ class ORCAObstacles(Policy):
 
         """
         super().__init__()
-        self.name = 'ORCA'
+        self.name = "ORCA"
         self.trainable = False
         self.safety_space = safety_space
         self.neighbor_dist = 10
@@ -72,11 +72,9 @@ class ORCAObstacles(Policy):
         return
 
     def configure(self, config):
-        self.FOV_min_angle = config.getfloat(
-            'map', 'angle_min') * np.pi % (2 * np.pi)
-        self.FOV_max_angle = config.getfloat(
-            'map', 'angle_max') * np.pi % (2 * np.pi)
-        self.safety_space = config.getfloat('reward', 'discomfort_dist')
+        self.FOV_min_angle = config.getfloat("map", "angle_min") * np.pi % (2 * np.pi)
+        self.FOV_max_angle = config.getfloat("map", "angle_max") * np.pi % (2 * np.pi)
+        self.safety_space = config.getfloat("reward", "discomfort_dist")
 
     def reset(self):
         del self.sim
@@ -93,30 +91,47 @@ class ORCAObstacles(Policy):
         @return Action of the agent
         """
         self_state = state.self_state
-        params = self.neighbor_dist, self.max_neighbors, self.time_horizon, self.time_horizon_obst
+        params = (
+            self.neighbor_dist,
+            self.max_neighbors,
+            self.time_horizon,
+            self.time_horizon_obst,
+        )
         # create sim with static obstacles if they don't exist
         if self.sim is None:
-            self.sim = rvo2.PyRVOSimulator(self.time_step, *params, agent.radius, agent.v_pref)
+            self.sim = rvo2.PyRVOSimulator(
+                self.time_step, *params, agent.radius, agent.v_pref
+            )
             for obstacle in global_map:
                 self.sim.addObstacle(obstacle)
             self.sim.processObstacles()
 
         # self.sim.clearAgents()
-        self.sim.addAgent(self_state.position, *params, self_state.radius + 0.01 + self.safety_space,
-                          self_state.v_pref, self_state.velocity)
+        self.sim.addAgent(
+            self_state.position,
+            *params,
+            self_state.radius + 0.01 + self.safety_space,
+            self_state.v_pref,
+            self_state.velocity
+        )
         agent_states_in_FOV = []
         for agent_state in state.agent_states:
             if self.agent_state_in_FOV(state.self_state, agent_state):
                 agent_states_in_FOV.append(agent_state)
         for agent_state in agent_states_in_FOV:
-            self.sim.addAgent(agent_state.position, *params, agent_state.radius + 0.01 + self.safety_space,
-                              agent.v_pref, agent_state.velocity)
+            self.sim.addAgent(
+                agent_state.position,
+                *params,
+                agent_state.radius + 0.01 + self.safety_space,
+                agent.v_pref,
+                agent_state.velocity
+            )
 
         # Set the preferred velocity to be a vector of unit magnitude (speed)
         # in the direction of the goal.
         velocity = np.array(
-            (self_state.gx - self_state.px,
-             self_state.gy - self_state.py))
+            (self_state.gx - self_state.px, self_state.gy - self_state.py)
+        )
         speed = np.linalg.norm(velocity)
         pref_vel = velocity / speed if speed > 1 else velocity
 
@@ -127,21 +142,23 @@ class ORCAObstacles(Policy):
 
         self.sim.doStep()
         action = ActionXY(*self.sim.getAgentVelocity(0))
-        action = ActionRot(np.linalg.norm([action.vx, action.vy]), (np.arctan2(
-            action.vy, action.vx) - self_state.theta))
+        action = ActionRot(
+            np.linalg.norm([action.vx, action.vy]),
+            (np.arctan2(action.vy, action.vx) - self_state.theta),
+        )
         agent.last_state = state
         self.adults_available = len(state.agent_states) > 0
 
         return action
 
     def agent_state_in_FOV(self, self_state, agent_state):
-        rot = np.arctan2(
-            agent_state.py -
-            self_state.py,
-            agent_state.px -
-            self_state.px)
+        rot = np.arctan2(agent_state.py - self_state.py, agent_state.px - self_state.px)
         angle = (rot - self_state.theta) % (2 * np.pi)
-        if angle > self.FOV_min_angle or angle < self.FOV_max_angle or self.FOV_min_angle == self.FOV_max_angle:
+        if (
+            angle > self.FOV_min_angle
+            or angle < self.FOV_max_angle
+            or self.FOV_min_angle == self.FOV_max_angle
+        ):
             return True
         else:
             return False

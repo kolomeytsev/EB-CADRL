@@ -22,23 +22,34 @@ class Trainer(object):
         self.scheduler_patience = 100
 
     def set_optimizer(self, learning_rate):
-        logging.info('Current learning rate: %f', learning_rate)
+        logging.info("Current learning rate: %f", learning_rate)
         if self.optimizer_algorithm == "sgd":
-            self.optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, momentum=0.9)
+            self.optimizer = optim.SGD(
+                self.model.parameters(), lr=learning_rate, momentum=0.9
+            )
         elif self.optimizer_algorithm == "adam":
             self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
             self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-                self.optimizer, 'min', patience=self.scheduler_patience, threshold=0.01,
-                factor=0.5, cooldown=self.scheduler_patience, min_lr=1e-5, verbose=True)
+                self.optimizer,
+                "min",
+                patience=self.scheduler_patience,
+                threshold=0.01,
+                factor=0.5,
+                cooldown=self.scheduler_patience,
+                min_lr=1e-5,
+                verbose=True,
+            )
         else:
-            self.optimizer = optim.SGD(self.model.parameters(), lr=learning_rate, momentum=0.9)
+            self.optimizer = optim.SGD(
+                self.model.parameters(), lr=learning_rate, momentum=0.9
+            )
 
     def optimize_epoch(self, num_epochs):
         """
         Used in imitation learning
         """
         if self.optimizer is None:
-            raise ValueError('Learning rate is not set!')
+            raise ValueError("Learning rate is not set!")
         if self.data_loader is None:
             self.data_loader = DataLoader(self.memory, self.batch_size, shuffle=True)
         average_epoch_loss = 0
@@ -56,7 +67,7 @@ class Trainer(object):
                 epoch_loss += loss.data.item()
 
             average_epoch_loss = epoch_loss / len(self.memory)
-            logging.debug('Average loss in epoch %d: %.2E', epoch, average_epoch_loss)
+            logging.debug("Average loss in epoch %d: %.2E", epoch, average_epoch_loss)
 
         return average_epoch_loss
 
@@ -65,7 +76,7 @@ class Trainer(object):
         Used in RL training mode
         """
         if self.optimizer is None:
-            raise ValueError('Learning rate is not set!')
+            raise ValueError("Learning rate is not set!")
         if self.data_loader is None:
             self.data_loader = DataLoader(self.memory, self.batch_size, shuffle=True)
         losses = 0
@@ -81,7 +92,7 @@ class Trainer(object):
             losses += loss.data.item()
 
         average_loss = losses / num_batches
-        logging.info('Average loss : %.2E', average_loss)
+        logging.info("Average loss : %.2E", average_loss)
 
         if self.scheduler is not None:
             self.scheduler.step(average_loss)

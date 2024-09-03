@@ -13,11 +13,11 @@ class Agent(object):
         """
         Base class for robot and adult. Have the physical attributes of an agent.
         """
-        self.visible = config.getboolean(section, 'visible')
-        self.v_pref = config.getfloat(section, 'v_pref', fallback=None)
-        self.radius = config.getfloat(section, 'radius', fallback=None)
-        self.policy = policy_factory[config.get(section, 'policy')]()
-        self.sensor = config.get(section, 'sensor')
+        self.visible = config.getboolean(section, "visible")
+        self.v_pref = config.getfloat(section, "v_pref", fallback=None)
+        self.radius = config.getfloat(section, "radius", fallback=None)
+        self.policy = policy_factory[config.get(section, "policy")]()
+        self.sensor = config.get(section, "sensor")
         self.kinematics = self.policy.kinematics if self.policy is not None else None
         self.px = None
         self.py = None
@@ -29,14 +29,17 @@ class Agent(object):
         self.time_step = None
         self.agent_type = None
 
-        self.v_pref_min = config.getfloat(section, 'v_pref_min', fallback=None)
-        self.v_pref_max = config.getfloat(section, 'v_pref_max', fallback=None)
-        self.radius_min = config.getfloat(section, 'radius_min', fallback=None)
-        self.radius_max = config.getfloat(section, 'radius_max', fallback=None)
+        self.v_pref_min = config.getfloat(section, "v_pref_min", fallback=None)
+        self.v_pref_max = config.getfloat(section, "v_pref_max", fallback=None)
+        self.radius_min = config.getfloat(section, "radius_min", fallback=None)
+        self.radius_max = config.getfloat(section, "radius_max", fallback=None)
 
     def print_info(self):
-        logging.info('Agent is {} and has {} kinematic constraint'.format(
-            'visible' if self.visible else 'invisible', self.kinematics))
+        logging.info(
+            "Agent is {} and has {} kinematic constraint".format(
+                "visible" if self.visible else "invisible", self.kinematics
+            )
+        )
 
     def set_policy(self, policy):
         self.policy = policy
@@ -52,7 +55,9 @@ class Agent(object):
         assert 0 < self.v_pref < 20
         assert 0 < self.radius < 20
 
-    def set(self, px, py, gx, gy, vx, vy, theta, radius=None, v_pref=None, agent_type=None):
+    def set(
+        self, px, py, gx, gy, vx, vy, theta, radius=None, v_pref=None, agent_type=None
+    ):
         self.px = px
         self.py = py
         self.gx = gx
@@ -68,20 +73,24 @@ class Agent(object):
             self.agent_type = agent_type
 
     def get_observable_state(self):
-        return ObservableState(self.px, self.py, self.vx, self.vy, self.radius, self.agent_type)
+        return ObservableState(
+            self.px, self.py, self.vx, self.vy, self.radius, self.agent_type
+        )
 
     def get_next_observable_state(self, action):
         self.check_validity(action)
         pos = self.compute_position(action, self.time_step)
         next_px, next_py = pos
-        if self.kinematics == 'holonomic':
+        if self.kinematics == "holonomic":
             next_vx = action.vx
             next_vy = action.vy
         else:
             next_theta = self.theta + action.r
             next_vx = action.v * np.cos(next_theta)
             next_vy = action.v * np.sin(next_theta)
-        return ObservableState(next_px, next_py, next_vx, next_vy, self.radius, self.agent_type)
+        return ObservableState(
+            next_px, next_py, next_vx, next_vy, self.radius, self.agent_type
+        )
 
     def get_full_state(self):
         return FullState(
@@ -94,7 +103,8 @@ class Agent(object):
             self.gy,
             self.v_pref,
             self.theta,
-            self.agent_type)
+            self.agent_type,
+        )
 
     def get_state_dict(self):
         return {
@@ -104,7 +114,7 @@ class Agent(object):
             "goal": (self.gx, self.gy),
             "v_pref": self.v_pref,
             "theta": self.theta,
-            "agent_type": self.agent_type
+            "agent_type": self.agent_type,
         }
 
     def set_from_state_dict(self, state):
@@ -146,14 +156,14 @@ class Agent(object):
         return
 
     def check_validity(self, action):
-        if self.kinematics == 'holonomic':
+        if self.kinematics == "holonomic":
             assert isinstance(action, ActionXY)
         else:
             assert isinstance(action, ActionRot) or isinstance(action, ActionXYRot)
 
     def compute_position(self, action, delta_t):
         self.check_validity(action)
-        if self.kinematics == 'holonomic':
+        if self.kinematics == "holonomic":
             px = self.px + action.vx * delta_t
             py = self.py + action.vy * delta_t
         else:
@@ -162,13 +172,21 @@ class Agent(object):
                 px = self.px + np.cos(theta) * action.v * delta_t
                 py = self.py + np.sin(theta) * action.v * delta_t
             elif isinstance(action, ActionXYRot):
-                px = self.px + np.cos(theta) * action.vx * delta_t - np.sin(theta) * action.vy * delta_t
-                py = self.py + np.sin(theta) * action.vx * delta_t + np.cos(theta) * action.vy * delta_t
+                px = (
+                    self.px
+                    + np.cos(theta) * action.vx * delta_t
+                    - np.sin(theta) * action.vy * delta_t
+                )
+                py = (
+                    self.py
+                    + np.sin(theta) * action.vx * delta_t
+                    + np.cos(theta) * action.vy * delta_t
+                )
             else:
                 raise Exception("Wrong action type")
 
         return px, py
-    
+
     def compute_velocity(self, action):
         self.check_validity(action)
         theta = self.theta + action.r
@@ -189,7 +207,7 @@ class Agent(object):
         pos = self.compute_position(action, self.time_step)
         self.px, self.py = pos
 
-        if self.kinematics == 'holonomic':
+        if self.kinematics == "holonomic":
             self.vx = action.vx
             self.vy = action.vy
         else:
@@ -200,10 +218,17 @@ class Agent(object):
                 self.vx = action.v * np.cos(self.theta)
                 self.vy = action.v * np.sin(self.theta)
             elif isinstance(action, ActionXYRot):
-                self.vx = action.vx * np.cos(self.theta) - action.vy * np.sin(self.theta)
-                self.vy = action.vx * np.sin(self.theta) + action.vy * np.cos(self.theta)
+                self.vx = action.vx * np.cos(self.theta) - action.vy * np.sin(
+                    self.theta
+                )
+                self.vy = action.vx * np.sin(self.theta) + action.vy * np.cos(
+                    self.theta
+                )
             else:
                 raise Exception("Wrong action type")
 
     def reached_destination(self):
-        return norm(np.array(self.get_position()) - np.array(self.get_goal_position())) < self.radius
+        return (
+            norm(np.array(self.get_position()) - np.array(self.get_goal_position()))
+            < self.radius
+        )

@@ -5,13 +5,20 @@ from rl.policy.policy_factory import policy_factory
 from simulator.agents.robot import Robot
 
 
-def configure_env_policy_robot(env_config_path, policy_config_path, model_path=None, phase="test",
-                               device="cpu", policy="sarl", env_name="EntityBasedCollisionAvoidance-v0"):
+def configure_env_policy_robot(
+    env_config_path,
+    policy_config_path,
+    model_path=None,
+    phase="test",
+    device="cpu",
+    policy="sarl",
+    env_name="EntityBasedCollisionAvoidance-v0",
+):
     env_config = configparser.RawConfigParser()
     env_config.read(env_config_path)
     env = gym.make(env_name)
     env.configure(env_config)
-    robot = Robot(env_config, 'robot')
+    robot = Robot(env_config, "robot")
     env.set_robot(robot)
 
     policy = policy_factory[policy]()

@@ -8,8 +8,11 @@ class Info(object):
     def __str__(self):
         pass
 
+
 class Timeout(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -17,11 +20,13 @@ class Timeout(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'Timeout'
+        return "Timeout"
 
 
 class ReachGoal(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -29,11 +34,18 @@ class ReachGoal(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'Reaching goal'
+        return "Reaching goal"
 
 
 class Danger(Info):
-    def __init__(self, min_dist, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self,
+        min_dist,
+        dist_to_goal=None,
+        dmin_adult=None,
+        dmin_bicycle=None,
+        dmin_child=None,
+    ):
         super().__init__()
         self.min_dist = min_dist
         self.dist_to_goal = dist_to_goal
@@ -42,11 +54,13 @@ class Danger(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'Too close'
+        return "Too close"
 
 
 class CollisionAdult(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -54,11 +68,13 @@ class CollisionAdult(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'CollisionAdult'
+        return "CollisionAdult"
 
 
 class CollisionBicycle(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -66,11 +82,13 @@ class CollisionBicycle(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'CollisionBicycle'
+        return "CollisionBicycle"
 
 
 class CollisionObstacle(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -78,11 +96,13 @@ class CollisionObstacle(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'CollisionObstacle'
+        return "CollisionObstacle"
 
 
 class CollisionChild(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -90,11 +110,13 @@ class CollisionChild(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'CollisionChild'
+        return "CollisionChild"
 
 
 class Collision(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -102,11 +124,13 @@ class Collision(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'Collision'
+        return "Collision"
 
 
 class CollisionOtherAgent(Info):
-    def __init__(self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None):
+    def __init__(
+        self, dist_to_goal=None, dmin_adult=None, dmin_bicycle=None, dmin_child=None
+    ):
         super().__init__()
         self.dist_to_goal = dist_to_goal
         self.dmin_adult = dmin_adult
@@ -114,7 +138,7 @@ class CollisionOtherAgent(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return 'Collision from other agent'
+        return "Collision from other agent"
 
 
 class Nothing(Info):
@@ -125,4 +149,4 @@ class Nothing(Info):
         self.dmin_child = dmin_child
 
     def __str__(self):
-        return ''
+        return ""
