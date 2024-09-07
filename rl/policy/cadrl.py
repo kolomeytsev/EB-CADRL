@@ -55,8 +55,6 @@ class CADRL(Policy):
         self.om_channel_size = None
         self.self_state_dim = 6
         self.agent_state_dim = 7
-        # self.self_state_dim = 8
-        # self.agent_state_dim = 5
         if self.with_agent_type:
             self.agent_type_state_dim = 4
         else:

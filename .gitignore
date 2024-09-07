@@ -139,18 +139,9 @@ __pycache__
 .cache/
 venv*/
 
-# data
-data/
-*.mp4
-*.png
-*.gif
-videos/
-gifs/
-dataset/
-plots/
-
 # tmp files
 tmp_env_configs/
+tmp/
 
 *.ipynb_checkpoints
 *.ipynb
