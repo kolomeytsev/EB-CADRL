@@ -23,11 +23,6 @@ def average(input_list):
         return 0
 
 
-def run_episode_wrapper(args_tuple):
-    """Wrapper function to unpack arguments."""
-    return run_episode(*args_tuple)
-
-
 def run_episode(args, env_config, policy_config_file, model_weights_path, episode):
     device = torch.device("cuda:0" if torch.cuda.is_available() and args.gpu else "cpu")
     logging.info("Using device: %s", device)
@@ -53,10 +48,7 @@ def run_episode(args, env_config, policy_config_file, model_weights_path, episod
     policy.set_phase(PHASE)
     policy.set_device(device)
 
-    # policy.set_env(env)
-
     success = 0
-
     collision = 0
     collision_adult = 0
     collision_bicycle = 0
@@ -159,14 +151,12 @@ def main():
     if args.model_path is not None:
         model_weights_path = args.model_path
 
-    # configure logging and device
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s, %(levelname)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # configure environment
     env_config = configparser.RawConfigParser()
     env_config.read(env_config_file)
 
@@ -176,15 +166,14 @@ def main():
         (args, env_config, policy_config_file, model_weights_path, episode)
         for episode in episodes
     ]
-    # results = []
-    # for args in args_list:
-    #     results.append(run_episode(*args))
-    print("multiprocessing.cpu_count():", multiprocessing.cpu_count())
-    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+
+    processes = args.processes if args.processes is not None else multiprocessing.cpu_count()
+    logging.info(f"Using {processes} processes")
+    with multiprocessing.Pool(processes=processes) as pool:
         results = pool.starmap(run_episode, args_list)
     df = pd.DataFrame(results)
     df.to_csv(args.csv)
-    print("time passed: ", time.time() - t0)
+    logging.info(f"Time passed: {time.time() - t0}")
 
 
 if __name__ == "__main__":
